@@ -1,0 +1,18 @@
+{
+	"schemaVersion": 1,
+	"id": "identify-test",
+	"version": "1.0.0",
+	"name": "Identify in-game tests",
+	"description": "Development-only client game tests for Identify. Not shipped.",
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"dev.identify.gametest.IdentifyClientGameTest"
+		]
+	},
+	"depends": {
+		"identify": "*",
+		"fabric-client-gametest-api-v1": "*"
+	}
+}

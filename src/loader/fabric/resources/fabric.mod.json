@@ -1,0 +1,35 @@
+{
+	"schemaVersion": 1,
+	"id": "identify",
+	"version": "${version}",
+	"name": "Identify",
+	"description": "Shows the name and icon of the block or entity you are looking at, with extras like crop growth and baby grow-up timers, and adds durability, food, and fuel info to item tooltips. Client-side only.",
+	"icon": "assets/identify/icon.png",
+	"authors": [
+		"comedy01"
+	],
+	"license": "MIT",
+	"contact": {
+		"homepage": "https://github.com/comedy01/Identify",
+		"sources": "https://github.com/comedy01/Identify",
+		"issues": "https://github.com/comedy01/Identify/issues"
+	},
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.identify.fabric.IdentifyFabric"
+		],
+		"modmenu": [
+			"dev.identify.fabric.IdentifyModMenu"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"fabric-api": ">=${fabric_api_version}",
+		"minecraft": "${range}",
+		"java": ">=${java_version}"
+	},
+	"suggests": {
+		"modmenu": "*"
+	}
+}
