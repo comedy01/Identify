@@ -2,6 +2,7 @@ package dev.identify.hud;
 
 import dev.identify.client.IdentifyClient;
 import dev.identify.config.IdentifyConfig;
+import dev.identify.config.IdentifyPolicy;
 import dev.identify.look.LookResolver;
 import dev.identify.look.LookTarget;
 import net.minecraft.client.DeltaTracker;
@@ -71,8 +72,8 @@ public final class IdentifyHudRenderer {
         int boxWidth = contentWidth + PADDING * 2;
         int boxHeight = contentHeight + PADDING * 2;
 
-        int left = (graphics.guiWidth() - boxWidth) / 2;
-        int top = config.yOffset();
+        int left = IdentifyPolicy.place(config.xPosition(), graphics.guiWidth(), boxWidth);
+        int top = IdentifyPolicy.place(config.yPosition(), graphics.guiHeight(), boxHeight);
 
         graphics.fill(left, top, left + boxWidth, top + boxHeight, BORDER);
         graphics.fill(left + 1, top + 1, left + boxWidth - 1, top + boxHeight - 1, BACKGROUND);

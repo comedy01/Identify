@@ -67,7 +67,7 @@ public final class LookResolver {
         Item item = state.getBlock().asItem();
         ItemStack icon = item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item);
         String namespace = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace();
-        List<Component> details = config.showDetails() ? BlockDetails.of(state) : List.of();
+        List<Component> details = config.showDetails() ? BlockDetails.of(level, pos, state) : List.of();
         return new LookTarget(state.getBlock().getName(), icon, namespace, details);
     }
 

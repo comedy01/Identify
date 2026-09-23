@@ -22,7 +22,8 @@ class IdentifyConfigTest {
         assertTrue(Files.isRegularFile(file));
         assertTrue(config.enabled());
         assertEquals(IdentifyPolicy.DEFAULT_RANGE, config.range());
-        assertEquals(IdentifyPolicy.DEFAULT_Y_OFFSET, config.yOffset());
+        assertEquals(IdentifyPolicy.DEFAULT_X_POSITION, config.xPosition());
+        assertEquals(IdentifyPolicy.DEFAULT_Y_POSITION, config.yPosition());
     }
 
     @Test
@@ -32,23 +33,39 @@ class IdentifyConfigTest {
         config.setShowEntities(false);
         config.setItemTooltips(false);
         config.setRange(20.0);
-        config.setYOffset(40);
+        config.setXPosition(100);
+        config.setYPosition(35);
         config.save(file);
 
         IdentifyConfig loaded = IdentifyConfig.load(file);
         assertFalse(loaded.showEntities());
         assertFalse(loaded.itemTooltips());
         assertEquals(20.0, loaded.range());
-        assertEquals(40, loaded.yOffset());
+        assertEquals(100, loaded.xPosition());
+        assertEquals(35, loaded.yPosition());
     }
 
     @Test
     void outOfRangeValuesAreClamped() throws IOException {
         Path file = dir.resolve(IdentifyConfig.FILE_NAME);
-        Files.writeString(file, "{\"range\": 9999, \"yOffset\": -50}", StandardCharsets.UTF_8);
+        Files.writeString(file, "{\"range\": 9999, \"xPosition\": 500, \"yPosition\": -50}", StandardCharsets.UTF_8);
         IdentifyConfig loaded = IdentifyConfig.load(file);
         assertEquals(IdentifyPolicy.MAX_RANGE, loaded.range());
-        assertEquals(IdentifyPolicy.MIN_Y_OFFSET, loaded.yOffset());
+        assertEquals(IdentifyPolicy.MAX_POSITION, loaded.xPosition());
+        assertEquals(IdentifyPolicy.MIN_POSITION, loaded.yPosition());
+    }
+
+    @Test
+    void placeReachesEveryEdgeAndCenter() {
+        int margin = IdentifyPolicy.EDGE_MARGIN;
+        assertEquals(margin, IdentifyPolicy.place(0, 400, 100));
+        assertEquals(400 - 100 - margin, IdentifyPolicy.place(100, 400, 100));
+        assertEquals((400 - 100) / 2, IdentifyPolicy.place(50, 400, 100));
+    }
+
+    @Test
+    void placePinsOversizedBoxToStartEdge() {
+        assertEquals(IdentifyPolicy.EDGE_MARGIN, IdentifyPolicy.place(100, 100, 300));
     }
 
     @Test
@@ -72,8 +89,10 @@ class IdentifyConfigTest {
         IdentifyConfig config = new IdentifyConfig();
         config.setEnabled(false);
         config.setRange(30.0);
+        config.setXPosition(100);
         config.resetToDefaults();
         assertTrue(config.enabled());
         assertEquals(IdentifyPolicy.DEFAULT_RANGE, config.range());
+        assertEquals(IdentifyPolicy.DEFAULT_X_POSITION, config.xPosition());
     }
 }

@@ -9,13 +9,19 @@ Supported versions: 26.1 to 26.3.
 ## Features
 
 - **Block and entity panel** - the icon, name, and owning mod of whatever is under your crosshair, out to a configurable range.
-- **Entity details** - health, and for baby animals the time left until they grow up or, for adults, until they can breed again.
-- **Block details** - crop growth, redstone power, and the best tool (and tier) to mine the block.
+- **Mob intel** - health with armor, baby grow-up and breeding timers, a pet's owner, a villager's profession and level, a horse's speed and jump height, active effects, and the item a mob is holding. The panel shows at most four detail lines, so it stays compact.
+- **Block details** - crop growth, redstone power, the best tool (and tier) to mine the block, what a spawner spawns, a beacon's tier, range and effects, and a beehive's honey level.
 - **Item tooltips** - remaining durability with a percentage, hunger and saturation for food, and how many items a fuel smelts.
-- **Configurable** - toggle blocks, entities, icon, details, and mod name, and adjust range and vertical position.
+- **Equipment comparison** - hold Shift over armor or a weapon to see how it compares with what you have equipped, such as `+2 Armor, +2 Toughness`.
+- **Placement** - two sliders move the panel anywhere on screen, from the top-left corner to the bottom-right corner, at any GUI scale.
+- **Configurable** - toggle blocks, entities, icon, details, mod name, and item comparison, and adjust range and position.
 - **Client-side only** - there is nothing to install on a server.
 
-Exact grow-up and breeding timers, and fuel values on 26.3, come from the integrated server, so they are available in singleplayer and on a LAN host. On other servers a baby animal is shown as just "Baby".
+Some information depends on where you play:
+
+- Exact grow-up and breeding timers, and fuel values on 26.3, come from the integrated server, so they are available in singleplayer and on a LAN host. On other servers a baby animal is shown as just "Baby".
+- Servers do not send other mobs' active effects to clients, so the effects line only appears in singleplayer (and for yourself).
+- A pet's owner is looked up in the player list, so the name only shows while the owner is online. Otherwise the panel shows "Tamed".
 
 ## Install
 

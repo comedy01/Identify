@@ -42,11 +42,17 @@ public final class IdentifyConfig {
     @SerializedName("itemTooltips")
     private boolean itemTooltips = IdentifyPolicy.DEFAULT_ITEM_TOOLTIPS;
 
+    @SerializedName("compareItems")
+    private boolean compareItems = IdentifyPolicy.DEFAULT_COMPARE_ITEMS;
+
     @SerializedName("range")
     private double range = IdentifyPolicy.DEFAULT_RANGE;
 
-    @SerializedName("yOffset")
-    private int yOffset = IdentifyPolicy.DEFAULT_Y_OFFSET;
+    @SerializedName("xPosition")
+    private int xPosition = IdentifyPolicy.DEFAULT_X_POSITION;
+
+    @SerializedName("yPosition")
+    private int yPosition = IdentifyPolicy.DEFAULT_Y_POSITION;
 
     public boolean enabled() {
         return enabled;
@@ -104,6 +110,14 @@ public final class IdentifyConfig {
         itemTooltips = value;
     }
 
+    public boolean compareItems() {
+        return compareItems;
+    }
+
+    public void setCompareItems(boolean value) {
+        compareItems = value;
+    }
+
     public double range() {
         return range;
     }
@@ -112,12 +126,20 @@ public final class IdentifyConfig {
         range = IdentifyPolicy.clampRange(value);
     }
 
-    public int yOffset() {
-        return yOffset;
+    public int xPosition() {
+        return xPosition;
     }
 
-    public void setYOffset(int value) {
-        yOffset = IdentifyPolicy.clampYOffset(value);
+    public void setXPosition(int value) {
+        xPosition = IdentifyPolicy.clampPosition(value);
+    }
+
+    public int yPosition() {
+        return yPosition;
+    }
+
+    public void setYPosition(int value) {
+        yPosition = IdentifyPolicy.clampPosition(value);
     }
 
     public void resetToDefaults() {
@@ -128,13 +150,16 @@ public final class IdentifyConfig {
         showDetails = IdentifyPolicy.DEFAULT_SHOW_DETAILS;
         showModName = IdentifyPolicy.DEFAULT_SHOW_MOD_NAME;
         itemTooltips = IdentifyPolicy.DEFAULT_ITEM_TOOLTIPS;
+        compareItems = IdentifyPolicy.DEFAULT_COMPARE_ITEMS;
         range = IdentifyPolicy.DEFAULT_RANGE;
-        yOffset = IdentifyPolicy.DEFAULT_Y_OFFSET;
+        xPosition = IdentifyPolicy.DEFAULT_X_POSITION;
+        yPosition = IdentifyPolicy.DEFAULT_Y_POSITION;
     }
 
     private void sanitize() {
         setRange(range);
-        setYOffset(yOffset);
+        setXPosition(xPosition);
+        setYPosition(yPosition);
     }
 
     public static IdentifyConfig load(Path file) {

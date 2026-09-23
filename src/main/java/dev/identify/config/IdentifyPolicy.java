@@ -8,14 +8,18 @@ public final class IdentifyPolicy {
     public static final boolean DEFAULT_SHOW_DETAILS = true;
     public static final boolean DEFAULT_SHOW_MOD_NAME = true;
     public static final boolean DEFAULT_ITEM_TOOLTIPS = true;
+    public static final boolean DEFAULT_COMPARE_ITEMS = true;
 
     public static final double MIN_RANGE = 4.0D;
     public static final double MAX_RANGE = 32.0D;
     public static final double DEFAULT_RANGE = 8.0D;
 
-    public static final int MIN_Y_OFFSET = 0;
-    public static final int MAX_Y_OFFSET = 120;
-    public static final int DEFAULT_Y_OFFSET = 4;
+    public static final int MIN_POSITION = 0;
+    public static final int MAX_POSITION = 100;
+    public static final int DEFAULT_X_POSITION = 50;
+    public static final int DEFAULT_Y_POSITION = 0;
+
+    public static final int EDGE_MARGIN = 4;
 
     private IdentifyPolicy() {
     }
@@ -27,7 +31,15 @@ public final class IdentifyPolicy {
         return Math.max(MIN_RANGE, Math.min(MAX_RANGE, value));
     }
 
-    public static int clampYOffset(int value) {
-        return Math.max(MIN_Y_OFFSET, Math.min(MAX_Y_OFFSET, value));
+    public static int clampPosition(int value) {
+        return Math.max(MIN_POSITION, Math.min(MAX_POSITION, value));
+    }
+
+    public static int place(int percent, int screen, int size) {
+        int free = screen - size - EDGE_MARGIN * 2;
+        if (free <= 0) {
+            return EDGE_MARGIN;
+        }
+        return EDGE_MARGIN + Math.round(free * clampPosition(percent) / 100.0F);
     }
 }

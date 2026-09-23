@@ -1,7 +1,9 @@
 package dev.identify.look;
 
+import dev.identify.client.IdentifyClient;
 import dev.identify.info.TickTime;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.food.FoodProperties;
@@ -45,6 +47,10 @@ public final class ItemDetails {
                     ? Long.toString(Math.round(smelts))
                     : String.format(Locale.ROOT, "%.1f", smelts);
             lines.add(Component.translatable("identify.item.fuel", shown).withStyle(ChatFormatting.RED));
+        }
+
+        if (IdentifyClient.config().compareItems()) {
+            ItemCompare.append(Minecraft.getInstance(), stack, lines);
         }
     }
 

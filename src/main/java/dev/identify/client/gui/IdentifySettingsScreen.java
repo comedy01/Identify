@@ -51,7 +51,9 @@ public final class IdentifySettingsScreen extends OptionsSubScreen {
 
         list.addSmall(List.of(
                 toggleButton("identify.options.mod_name", null,
-                        config::showModName, config::setShowModName)));
+                        config::showModName, config::setShowModName),
+                toggleButton("identify.options.compare_items", "identify.options.compare_items.tooltip",
+                        config::compareItems, config::setCompareItems)));
 
         AbstractWidget rangeSlider = new StepSlider(
                 "identify.options.range", "identify.options.range.tooltip",
@@ -59,13 +61,21 @@ public final class IdentifySettingsScreen extends OptionsSubScreen {
                 config.range(),
                 value -> String.format(Locale.ROOT, "%.0f", value),
                 config::setRange);
-        AbstractWidget offsetSlider = new StepSlider(
-                "identify.options.y_offset", "identify.options.y_offset.tooltip",
-                IdentifyPolicy.MIN_Y_OFFSET, IdentifyPolicy.MAX_Y_OFFSET, 1.0,
-                config.yOffset(),
-                value -> Integer.toString((int) value),
-                value -> config.setYOffset((int) value));
-        list.addSmall(List.of(rangeSlider, offsetSlider));
+        list.addSmall(List.of(rangeSlider));
+
+        AbstractWidget xSlider = new StepSlider(
+                "identify.options.x_position", "identify.options.x_position.tooltip",
+                IdentifyPolicy.MIN_POSITION, IdentifyPolicy.MAX_POSITION, 1.0,
+                config.xPosition(),
+                value -> (int) value + "%",
+                value -> config.setXPosition((int) value));
+        AbstractWidget ySlider = new StepSlider(
+                "identify.options.y_position", "identify.options.y_position.tooltip",
+                IdentifyPolicy.MIN_POSITION, IdentifyPolicy.MAX_POSITION, 1.0,
+                config.yPosition(),
+                value -> (int) value + "%",
+                value -> config.setYPosition((int) value));
+        list.addSmall(List.of(xSlider, ySlider));
 
         list.addSmall(List.of(resetButton(config)));
     }
