@@ -41,4 +41,4 @@ Optional: add [Mod Menu](https://modrinth.com/mod/modmenu) to get a settings scr
 
 ## Building
 
-`./gradlew build -Pminecraft_version=26.3` builds the Fabric jar for one version; add `-Ploader=neoforge` for NeoForge. `./gradlew runClientGameTest -Pminecraft_version=26.3` runs the in-game test on Fabric (1.21.4 and newer).
+`./gradlew build -Pminecraft_version=26.3` builds the Fabric jar for one version; add `-Ploader=neoforge` for NeoForge. `./gradlew runClientGameTest -Pminecraft_version=26.3` runs the in-game test on Fabric (1.21.4 and newer), and `./gradlew runClient -Ploader=neoforge -Pminecraft_version=1.21.1` starts NeoForge with a load self-test that prints its result and closes the game.

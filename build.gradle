@@ -78,8 +78,17 @@ dependencies {
 }
 
 if (neoforge) {
+	sourceSets {
+		nftest
+	}
+
+	dependencies {
+		nftestImplementation sourceSets.main.output
+	}
+
 	neoForge {
 		version = versionProps.getProperty("neoforge_version")
+		addModdingDependenciesTo(sourceSets.nftest)
 		runs {
 			client {
 				client()
@@ -88,6 +97,9 @@ if (neoforge) {
 		mods {
 			identify {
 				sourceSet sourceSets.main
+			}
+			identify_test {
+				sourceSet sourceSets.nftest
 			}
 		}
 	}

@@ -1,0 +1,8 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+
+[[mods]]
+modId="identify_test"
+version="1.0.0"
+displayName="Identify self test"
