@@ -107,7 +107,7 @@ public final class IdentifySettingsScreen extends OptionsSubScreen {
     private AbstractWidget resetButton(IdentifyConfig config) {
         return Button.builder(Component.translatable("identify.options.reset"), button -> {
                     config.resetToDefaults();
-                    rebuildWidgets();
+                    ScreenOpener.open(minecraft, new IdentifySettingsScreen(lastScreen, options));
                 })
                 .width(WIDTH)
                 .build();

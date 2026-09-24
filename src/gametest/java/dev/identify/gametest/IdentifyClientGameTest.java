@@ -1,7 +1,10 @@
 package dev.identify.gametest;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.identify.client.IdentifyClient;
+import dev.identify.client.gui.IdentifySettingsScreen;
 import dev.identify.config.IdentifyConfig;
+import dev.identify.config.IdentifyPolicy;
 import dev.identify.look.BlockDetails;
 import dev.identify.look.ItemCompare;
 import dev.identify.look.ItemDetails;
@@ -10,8 +13,14 @@ import dev.identify.look.LookTarget;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -78,6 +87,7 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
             checkMobIntel(context, world);
             checkBlockEntities(context, world);
             checkCompare(context);
+            checkSettingsReset(context);
         }
         log("ALL CHECKS PASSED");
     }
@@ -171,6 +181,109 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
         check(sword.get().equals("+1 Damage"), "wrong sword comparison: " + sword.get());
         check(blockIgnored.get(), "a block was compared against a sword");
         check(sameIgnored.get(), "identical items were compared");
+    }
+
+    private static void checkSettingsReset(ClientGameTestContext context) {
+        IdentifyConfig config = IdentifyClient.config();
+        config.setXPosition(10);
+        context.setScreen(() -> new IdentifySettingsScreen(null, Minecraft.getInstance().options));
+        context.waitForScreen(IdentifySettingsScreen.class);
+        context.waitTicks(5);
+        log("screenshot: " + context.takeScreenshot("identify-settings"));
+        context.getInput().setCursorPos(200.0, 200.0);
+        context.getInput().scroll(-20.0);
+        context.waitTicks(2);
+        clickSettingsButton(context, "identify.options.reset");
+        context.waitTicks(5);
+        check(config.xPosition() == IdentifyPolicy.DEFAULT_X_POSITION, "reset did not restore the horizontal position");
+        log("screenshot: " + context.takeScreenshot("identify-settings-after-reset"));
+
+        int sliders = context.computeOnClient(client -> countSliders(Screens.current(client), "Horizontal"));
+        check(sliders == 1, "reset left " + sliders + " horizontal sliders on the screen");
+        dragSliderToMax(context, "Horizontal");
+        context.waitTicks(5);
+        check(config.xPosition() == IdentifyPolicy.MAX_POSITION, "dragging the horizontal slider after reset did not change the config");
+        String shown = context.computeOnClient(client ->
+                findSlider(Screens.current(client), "Horizontal").getMessage().getString());
+        check(shown.contains("100%"), "the horizontal slider did not move after reset: " + shown);
+
+        context.setScreen(() -> null);
+        context.waitTicks(5);
+        config.resetToDefaults();
+        IdentifyClient.saveConfig();
+    }
+
+    private static void clickSettingsButton(ClientGameTestContext context, String translationKey) {
+        double[] center = context.computeOnClient(client -> {
+            Button button = findSettingsButton(Screens.current(client), translationKey);
+            check(button != null, "no button '" + translationKey + "' on the current screen");
+            double scale = client.getWindow().getGuiScale();
+            return new double[] {
+                    (button.getX() + button.getWidth() / 2.0) * scale,
+                    (button.getY() + button.getHeight() / 2.0) * scale};
+        });
+        context.getInput().setCursorPos(center[0], center[1]);
+        context.waitTick();
+        context.getInput().pressMouse(InputConstants.MOUSE_BUTTON_LEFT);
+    }
+
+    private static void dragSliderToMax(ClientGameTestContext context, String captionText) {
+        context.getInput().setCursorPos(200.0, 200.0);
+        context.getInput().scroll(-20.0);
+        context.waitTicks(2);
+        double[] bounds = context.computeOnClient(client -> {
+            AbstractSliderButton slider = findSlider(Screens.current(client), captionText);
+            check(slider != null, "no slider '" + captionText + "' on the current screen");
+            double scale = client.getWindow().getGuiScale();
+            return new double[] {
+                    (slider.getX() + slider.getWidth() - 2.0) * scale,
+                    (slider.getY() + slider.getHeight() / 2.0) * scale};
+        });
+        context.getInput().setCursorPos(bounds[0], bounds[1]);
+        context.waitTick();
+        context.getInput().pressMouse(InputConstants.MOUSE_BUTTON_LEFT);
+    }
+
+    private static Button findSettingsButton(GuiEventListener node, String translationKey) {
+        if (node instanceof Button button
+                && button.getMessage().getContents() instanceof TranslatableContents contents
+                && contents.getKey().equals(translationKey)) {
+            return button;
+        }
+        if (node instanceof ContainerEventHandler container) {
+            for (GuiEventListener child : container.children()) {
+                Button found = findSettingsButton(child, translationKey);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static AbstractSliderButton findSlider(GuiEventListener node, String captionText) {
+        if (node instanceof AbstractSliderButton slider && slider.getMessage().getString().contains(captionText)) {
+            return slider;
+        }
+        if (node instanceof ContainerEventHandler container) {
+            for (GuiEventListener child : container.children()) {
+                AbstractSliderButton found = findSlider(child, captionText);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static int countSliders(GuiEventListener node, String captionText) {
+        int count = node instanceof AbstractSliderButton slider && slider.getMessage().getString().contains(captionText) ? 1 : 0;
+        if (node instanceof ContainerEventHandler container) {
+            for (GuiEventListener child : container.children()) {
+                count += countSliders(child, captionText);
+            }
+        }
+        return count;
     }
 
     private static String lookAfter(ClientGameTestContext context, TestSingleplayerContext world, String... commands) {
