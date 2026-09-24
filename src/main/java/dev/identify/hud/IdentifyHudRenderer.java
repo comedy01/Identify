@@ -8,7 +8,6 @@ import dev.identify.look.LookTarget;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
@@ -29,7 +28,7 @@ public final class IdentifyHudRenderer {
     private IdentifyHudRenderer() {
     }
 
-    public static void render(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+    public static void render(Canvas canvas, DeltaTracker deltaTracker) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || HudCompat.isScreenOpen(mc) || HudCompat.isGuiHidden(mc)) {
             return;
@@ -44,10 +43,10 @@ public final class IdentifyHudRenderer {
         if (target == null) {
             return;
         }
-        draw(graphics, mc, target, config);
+        draw(canvas, mc, target, config);
     }
 
-    private static void draw(GuiGraphicsExtractor graphics, Minecraft mc, LookTarget target, IdentifyConfig config) {
+    private static void draw(Canvas canvas, Minecraft mc, LookTarget target, IdentifyConfig config) {
         Font font = mc.font;
         boolean icon = config.showIcon() && !target.icon().isEmpty();
 
@@ -72,23 +71,23 @@ public final class IdentifyHudRenderer {
         int boxWidth = contentWidth + PADDING * 2;
         int boxHeight = contentHeight + PADDING * 2;
 
-        int left = IdentifyPolicy.place(config.xPosition(), graphics.guiWidth(), boxWidth);
-        int top = IdentifyPolicy.place(config.yPosition(), graphics.guiHeight(), boxHeight);
+        int left = IdentifyPolicy.place(config.xPosition(), canvas.width(), boxWidth);
+        int top = IdentifyPolicy.place(config.yPosition(), canvas.height(), boxHeight);
 
-        graphics.fill(left, top, left + boxWidth, top + boxHeight, BORDER);
-        graphics.fill(left + 1, top + 1, left + boxWidth - 1, top + boxHeight - 1, BACKGROUND);
+        canvas.fill(left, top, left + boxWidth, top + boxHeight, BORDER);
+        canvas.fill(left + 1, top + 1, left + boxWidth - 1, top + boxHeight - 1, BACKGROUND);
 
         int textX = left + PADDING + (icon ? ICON_SIZE + ICON_GAP : 0);
         int textY = top + PADDING + (contentHeight - textHeight) / 2;
 
         if (icon) {
-            graphics.item(target.icon(), left + PADDING, top + PADDING + (contentHeight - ICON_SIZE) / 2);
+            canvas.item(target.icon(), left + PADDING, top + PADDING + (contentHeight - ICON_SIZE) / 2);
         }
 
         for (int i = 0; i < lines.size(); i++) {
             Component line = lines.get(i);
             int color = i == 0 ? NAME_COLOR : DETAIL_COLOR;
-            graphics.text(font, line, textX, textY + i * LINE_HEIGHT, color, i == 0);
+            canvas.text(font, line, textX, textY + i * LINE_HEIGHT, color, i == 0);
         }
     }
 }

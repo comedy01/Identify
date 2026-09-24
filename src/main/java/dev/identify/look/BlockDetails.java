@@ -2,11 +2,9 @@ package dev.identify.look;
 
 import dev.identify.info.TickTime;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
@@ -94,15 +92,15 @@ public final class BlockDetails {
 
     private static void beaconLines(Level level, BeaconBlockEntity beacon, List<Component> lines) {
         CompoundTag tag = beacon.getUpdateTag(level.registryAccess());
-        int tier = tag.getIntOr("Levels", 0);
+        int tier = NbtCompat.intOr(tag, "Levels", 0);
         if (tier <= 0) {
             return;
         }
         int range = BEACON_RANGE_BASE + tier * BEACON_RANGE_PER_TIER;
         lines.add(Component.translatable("identify.beacon.tier", tier, range));
 
-        String primaryId = tag.getStringOr("primary_effect", "");
-        String secondaryId = tag.getStringOr("secondary_effect", "");
+        String primaryId = NbtCompat.stringOr(tag, "primary_effect", "");
+        String secondaryId = NbtCompat.stringOr(tag, "secondary_effect", "");
         Component primary = effectName(primaryId);
         Component secondary = effectName(secondaryId);
         if (primary == null) {
@@ -119,14 +117,15 @@ public final class BlockDetails {
     }
 
     private static Component effectName(String id) {
-        Identifier key = Identifier.tryParse(id);
-        if (key == null) {
+        if (id.isEmpty()) {
             return null;
         }
-        return BuiltInRegistries.MOB_EFFECT.get(key)
-                .map(Holder.Reference::value)
-                .map(MobEffect::getDisplayName)
-                .orElse(null);
+        for (MobEffect effect : BuiltInRegistries.MOB_EFFECT) {
+            if (id.equals(String.valueOf(BuiltInRegistries.MOB_EFFECT.getKey(effect)))) {
+                return effect.getDisplayName();
+            }
+        }
+        return null;
     }
 
     private static void addIfPresent(List<Component> lines, Component line) {

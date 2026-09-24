@@ -5,7 +5,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -13,7 +12,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.equipment.Equippable;
 
 import java.util.List;
 
@@ -42,7 +40,7 @@ public final class ItemCompare {
             return;
         }
 
-        if (mc.hasShiftDown()) {
+        if (ShiftKey.isDown(mc)) {
             lines.add(Component.translatable("identify.compare.line", parts).withStyle(ChatFormatting.GRAY));
         } else {
             lines.add(Component.translatable("identify.compare.hint").withStyle(ChatFormatting.DARK_GRAY));
@@ -74,11 +72,8 @@ public final class ItemCompare {
     }
 
     public static EquipmentSlot slotFor(ItemStack stack) {
-        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
-        if (equippable != null && equippable.slot().isArmor()) {
-            return equippable.slot();
-        }
-        return EquipmentSlot.MAINHAND;
+        EquipmentSlot armor = EquipCompat.armorSlot(stack);
+        return armor == null ? EquipmentSlot.MAINHAND : armor;
     }
 
     private static double total(ItemStack stack, EquipmentSlot slot, Holder<Attribute> attribute) {

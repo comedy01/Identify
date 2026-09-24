@@ -4,7 +4,7 @@ Shows what you are looking at. Point at a block or an entity and a panel at the 
 
 Identify is a small client-side mod for Minecraft on Fabric or NeoForge, compatible with Mod Menu (Fabric) / the built-in config screen (NeoForge).
 
-Supported versions: 26.1 to 26.3.
+Supported versions: 1.21 to 26.3.
 
 ## Features
 
@@ -41,4 +41,4 @@ Optional: add [Mod Menu](https://modrinth.com/mod/modmenu) to get a settings scr
 
 ## Building
 
-`./gradlew build -Pminecraft_version=26.3` builds the Fabric jar for one version; add `-Ploader=neoforge` for NeoForge. `./gradlew runClientGameTest -Pminecraft_version=26.3` runs the in-game test on Fabric.
+`./gradlew build -Pminecraft_version=26.3` builds the Fabric jar for one version; add `-Ploader=neoforge` for NeoForge. `./gradlew runClientGameTest -Pminecraft_version=26.3` runs the in-game test on Fabric (1.21.4 and newer).

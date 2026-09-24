@@ -119,7 +119,7 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
         check(horse.contains("Tamed"), "missing tamed line: " + horse);
 
         String husk = lookAndShoot(context, world, "identify-husk",
-                "summon husk 0 -60 4 {NoAI:1b,equipment:{mainhand:{id:\"minecraft:iron_sword\"},head:{id:\"minecraft:iron_helmet\"}}}",
+                Summons.ARMED_HUSK,
                 "effect give @e[type=husk,limit=1] minecraft:speed 100 1");
         log("husk: " + husk);
         check(husk.contains("Armor:"), "missing armor: " + husk);

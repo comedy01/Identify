@@ -14,15 +14,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.equine.AbstractHorse;
-import net.minecraft.world.entity.animal.equine.Llama;
-import net.minecraft.world.entity.npc.villager.VillagerData;
-import net.minecraft.world.entity.npc.villager.VillagerDataHolder;
-import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -58,7 +51,7 @@ public final class EntityDetails {
         }
 
         addIfPresent(lines, ownerLine(mc, entity));
-        addIfPresent(lines, villagerLine(entity));
+        addIfPresent(lines, MobCompat.villagerLine(entity));
         addIfPresent(lines, horseLine(entity));
 
         if (entity instanceof LivingEntity living) {
@@ -88,21 +81,11 @@ public final class EntityDetails {
     }
 
     private static Component ownerLine(Minecraft mc, Entity entity) {
-        boolean tame;
-        EntityReference<LivingEntity> owner;
-        if (entity instanceof TamableAnimal pet) {
-            tame = pet.isTame();
-            owner = pet.getOwnerReference();
-        } else if (entity instanceof AbstractHorse horse) {
-            tame = horse.isTamed();
-            owner = horse.getOwnerReference();
-        } else {
+        if (!MobCompat.isTamed(entity)) {
             return null;
         }
-        if (!tame) {
-            return null;
-        }
-        String name = owner == null ? null : playerName(mc, owner.getUUID());
+        UUID owner = MobCompat.owner(entity);
+        String name = owner == null ? null : playerName(mc, owner);
         if (name != null) {
             return Component.translatable("identify.entity.owner", name);
         }
@@ -115,28 +98,11 @@ public final class EntityDetails {
             return null;
         }
         PlayerInfo info = connection.getPlayerInfo(uuid);
-        return info == null ? null : info.getProfile().name();
-    }
-
-    private static Component villagerLine(Entity entity) {
-        if (!(entity instanceof VillagerDataHolder holder)) {
-            return null;
-        }
-        VillagerData data = holder.getVillagerData();
-        if (data.profession().is(VillagerProfession.NONE)) {
-            boolean baby = entity instanceof LivingEntity living && living.isBaby();
-            return baby ? null : Component.translatable("identify.entity.unemployed");
-        }
-        Component profession = data.profession().value().name();
-        if (data.profession().is(VillagerProfession.NITWIT)) {
-            return profession;
-        }
-        return Component.translatable(
-                "identify.entity.villager", profession, Component.translatable("merchant.level." + data.level()));
+        return info == null ? null : Profiles.name(info);
     }
 
     private static Component horseLine(Entity entity) {
-        if (!(entity instanceof AbstractHorse horse) || horse instanceof Llama) {
+        if (!MobCompat.isRideable(entity) || !(entity instanceof LivingEntity horse)) {
             return null;
         }
         double speed = HorseStats.blocksPerSecond(horse.getAttributeValue(Attributes.MOVEMENT_SPEED));

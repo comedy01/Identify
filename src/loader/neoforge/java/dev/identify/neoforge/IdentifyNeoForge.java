@@ -1,11 +1,12 @@
 package dev.identify.neoforge;
 
 import dev.identify.client.IdentifyClient;
+import dev.identify.client.Ids;
 import dev.identify.client.gui.IdentifySettingsScreen;
+import dev.identify.hud.Canvas;
 import dev.identify.hud.IdentifyHudRenderer;
 import dev.identify.look.ItemDetails;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -29,9 +30,8 @@ public final class IdentifyNeoForge {
     }
 
     private static void registerGuiLayers(RegisterGuiLayersEvent event) {
-        event.registerAboveAll(
-                Identifier.fromNamespaceAndPath(MOD_ID, "look_info"),
-                IdentifyHudRenderer::render);
+        event.registerAboveAll(Ids.of("look_info"), (graphics, deltaTracker) ->
+                IdentifyHudRenderer.render(new Canvas(graphics), deltaTracker));
     }
 
     private static void onTooltip(ItemTooltipEvent event) {
