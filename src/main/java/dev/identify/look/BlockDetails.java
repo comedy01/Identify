@@ -1,8 +1,8 @@
 package dev.identify.look;
 
+import dev.identify.Texts;
 import dev.identify.info.TickTime;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
@@ -60,59 +60,59 @@ public final class BlockDetails {
             int value = state.getValue(age);
             int max = Collections.max(age.getPossibleValues());
             if (value >= max) {
-                lines.add(Component.translatable("identify.crop.mature"));
+                lines.add(Texts.translatable("identify.crop.mature"));
             } else {
-                lines.add(Component.translatable("identify.crop.growth", value, max, TickTime.percent(value, max)));
+                lines.add(Texts.translatable("identify.crop.growth", value, max, TickTime.percent(value, max)));
             }
         }
 
         if (state.is(Blocks.REDSTONE_WIRE)) {
-            lines.add(Component.translatable("identify.redstone.power", state.getValue(BlockStateProperties.POWER)));
+            lines.add(Texts.translatable("identify.redstone.power", state.getValue(BlockStateProperties.POWER)));
         }
 
         if (state.getBlock() instanceof BeehiveBlock && state.hasProperty(BeehiveBlock.HONEY_LEVEL)) {
             int honey = state.getValue(BeehiveBlock.HONEY_LEVEL);
             int max = BeehiveBlock.MAX_HONEY_LEVELS;
             if (honey >= max) {
-                lines.add(Component.translatable("identify.hive.ready"));
+                lines.add(Texts.translatable("identify.hive.ready"));
             } else {
-                lines.add(Component.translatable("identify.hive.honey", honey, max));
+                lines.add(Texts.translatable("identify.hive.honey", honey, max));
             }
         }
         return lines;
     }
 
     private static Component spawnerLine(Level level, BlockPos pos, SpawnerBlockEntity spawner) {
-        Entity display = spawner.getSpawner().getOrCreateDisplayEntity(level, pos);
+        Entity display = BlockEntityCompat.spawnerEntity(level, pos, spawner);
         if (display == null) {
             return null;
         }
-        return Component.translatable("identify.spawner.mob", display.getType().getDescription());
+        return Texts.translatable("identify.spawner.mob", display.getType().getDescription());
     }
 
     private static void beaconLines(Level level, BeaconBlockEntity beacon, List<Component> lines) {
-        CompoundTag tag = beacon.getUpdateTag(level.registryAccess());
+        CompoundTag tag = BlockEntityCompat.beaconTag(level, beacon);
         int tier = NbtCompat.intOr(tag, "Levels", 0);
         if (tier <= 0) {
             return;
         }
         int range = BEACON_RANGE_BASE + tier * BEACON_RANGE_PER_TIER;
-        lines.add(Component.translatable("identify.beacon.tier", tier, range));
+        lines.add(Texts.translatable("identify.beacon.tier", tier, range));
 
-        String primaryId = NbtCompat.stringOr(tag, "primary_effect", "");
-        String secondaryId = NbtCompat.stringOr(tag, "secondary_effect", "");
+        String primaryId = BlockEntityCompat.effectId(tag, true);
+        String secondaryId = BlockEntityCompat.effectId(tag, false);
         Component primary = effectName(primaryId);
         Component secondary = effectName(secondaryId);
         if (primary == null) {
             return;
         }
         if (secondary == null) {
-            lines.add(Component.translatable("identify.beacon.effects", primary));
+            lines.add(Texts.translatable("identify.beacon.effects", primary));
         } else if (secondaryId.equals(primaryId)) {
-            lines.add(Component.translatable("identify.beacon.effects",
-                    Component.translatable("potion.withAmplifier", primary, Component.translatable("potion.potency.1"))));
+            lines.add(Texts.translatable("identify.beacon.effects",
+                    Texts.translatable("potion.withAmplifier", primary, Texts.translatable("potion.potency.1"))));
         } else {
-            lines.add(Component.translatable("identify.beacon.effects_two", primary, secondary));
+            lines.add(Texts.translatable("identify.beacon.effects_two", primary, secondary));
         }
     }
 
@@ -120,8 +120,8 @@ public final class BlockDetails {
         if (id.isEmpty()) {
             return null;
         }
-        for (MobEffect effect : BuiltInRegistries.MOB_EFFECT) {
-            if (id.equals(String.valueOf(BuiltInRegistries.MOB_EFFECT.getKey(effect)))) {
+        for (MobEffect effect : GameRegistries.mobEffects()) {
+            if (id.equals(GameRegistries.mobEffectId(effect))) {
                 return effect.getDisplayName();
             }
         }
@@ -163,7 +163,7 @@ public final class BlockDetails {
         if (tool == null) {
             return null;
         }
-        Component toolName = Component.translatable("identify.tool." + tool);
+        Component toolName = Texts.translatable("identify.tool." + tool);
         String tier = null;
         if (state.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
             tier = "diamond";
@@ -173,8 +173,8 @@ public final class BlockDetails {
             tier = "stone";
         }
         if (tier == null) {
-            return Component.translatable("identify.tool.best", toolName);
+            return Texts.translatable("identify.tool.best", toolName);
         }
-        return Component.translatable("identify.tool.best_tier", toolName, Component.translatable("identify.tier." + tier));
+        return Texts.translatable("identify.tool.best_tier", toolName, Texts.translatable("identify.tier." + tier));
     }
 }

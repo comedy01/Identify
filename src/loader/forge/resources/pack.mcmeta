@@ -1,0 +1,6 @@
+{
+	"pack": {
+		"description": "Identify resources",
+		"pack_format": ${pack_format}
+	}
+}

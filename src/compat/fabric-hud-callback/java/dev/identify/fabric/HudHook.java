@@ -10,6 +10,6 @@ final class HudHook {
 
     static void register() {
         HudRenderCallback.EVENT.register((graphics, deltaTracker) ->
-                IdentifyHudRenderer.render(new Canvas(graphics), deltaTracker));
+                IdentifyHudRenderer.render(new Canvas(graphics), deltaTracker.getGameTimeDeltaPartialTick(false)));
     }
 }

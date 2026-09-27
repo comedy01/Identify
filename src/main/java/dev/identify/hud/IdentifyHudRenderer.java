@@ -1,11 +1,11 @@
 package dev.identify.hud;
 
+import dev.identify.Texts;
 import dev.identify.client.IdentifyClient;
 import dev.identify.config.IdentifyConfig;
 import dev.identify.config.IdentifyPolicy;
 import dev.identify.look.LookResolver;
 import dev.identify.look.LookTarget;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
@@ -28,7 +28,7 @@ public final class IdentifyHudRenderer {
     private IdentifyHudRenderer() {
     }
 
-    public static void render(Canvas canvas, DeltaTracker deltaTracker) {
+    public static void render(Canvas canvas, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || HudCompat.isScreenOpen(mc) || HudCompat.isGuiHidden(mc)) {
             return;
@@ -38,7 +38,6 @@ public final class IdentifyHudRenderer {
             return;
         }
 
-        float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
         LookTarget target = LookResolver.resolve(mc, partialTick, config);
         if (target == null) {
             return;
@@ -55,7 +54,7 @@ public final class IdentifyHudRenderer {
         lines.addAll(target.details());
         Component mod = null;
         if (config.showModName()) {
-            mod = Component.literal(LookResolver.modLabel(target))
+            mod = Texts.literal(LookResolver.modLabel(target))
                     .withStyle(Style.EMPTY.withItalic(true).withColor(MOD_COLOR));
             lines.add(mod);
         }

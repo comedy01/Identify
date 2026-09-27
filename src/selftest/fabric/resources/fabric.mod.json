@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "identify_selftest",
+	"version": "1.0.0",
+	"name": "Identify self test",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.identify.selftest.fabric.IdentifySelfTestFabric"
+		]
+	},
+	"depends": {
+		"identify": "*"
+	}
+}

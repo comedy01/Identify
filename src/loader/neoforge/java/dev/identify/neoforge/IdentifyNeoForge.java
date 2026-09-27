@@ -31,7 +31,7 @@ public final class IdentifyNeoForge {
 
     private static void registerGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAboveAll(Ids.of("look_info"), (graphics, deltaTracker) ->
-                IdentifyHudRenderer.render(new Canvas(graphics), deltaTracker));
+                IdentifyHudRenderer.render(new Canvas(graphics), deltaTracker.getGameTimeDeltaPartialTick(false)));
     }
 
     private static void onTooltip(ItemTooltipEvent event) {
