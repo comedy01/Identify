@@ -5,7 +5,6 @@ import dev.identify.info.TickTime;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -72,7 +71,7 @@ public final class BlockDetails {
 
         if (state.getBlock() instanceof BeehiveBlock && state.hasProperty(BeehiveBlock.HONEY_LEVEL)) {
             int honey = state.getValue(BeehiveBlock.HONEY_LEVEL);
-            int max = BeehiveBlock.MAX_HONEY_LEVELS;
+            int max = Collections.max(BeehiveBlock.HONEY_LEVEL.getPossibleValues());
             if (honey >= max) {
                 lines.add(Texts.translatable("identify.hive.ready"));
             } else {
@@ -150,28 +149,12 @@ public final class BlockDetails {
     }
 
     private static Component toolLine(BlockState state) {
-        String tool = null;
-        if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) {
-            tool = "pickaxe";
-        } else if (state.is(BlockTags.MINEABLE_WITH_AXE)) {
-            tool = "axe";
-        } else if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) {
-            tool = "shovel";
-        } else if (state.is(BlockTags.MINEABLE_WITH_HOE)) {
-            tool = "hoe";
-        }
+        String tool = HarvestTools.tool(state);
         if (tool == null) {
             return null;
         }
         Component toolName = Texts.translatable("identify.tool." + tool);
-        String tier = null;
-        if (state.is(BlockTags.NEEDS_DIAMOND_TOOL)) {
-            tier = "diamond";
-        } else if (state.is(BlockTags.NEEDS_IRON_TOOL)) {
-            tier = "iron";
-        } else if (state.is(BlockTags.NEEDS_STONE_TOOL)) {
-            tier = "stone";
-        }
+        String tier = HarvestTools.tier(state);
         if (tier == null) {
             return Texts.translatable("identify.tool.best", toolName);
         }

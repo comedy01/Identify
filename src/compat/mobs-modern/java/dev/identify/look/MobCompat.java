@@ -1,6 +1,7 @@
 package dev.identify.look;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.npc.villager.VillagerData;
 import net.minecraft.world.entity.npc.villager.VillagerDataHolder;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
 
@@ -36,6 +38,18 @@ final class MobCompat {
 
     static boolean isRideable(Entity entity) {
         return entity instanceof AbstractHorse && !(entity instanceof Llama);
+    }
+
+    static boolean isAgeable(Entity entity) {
+        return entity instanceof AgeableMob;
+    }
+
+    static Integer age(Entity entity) {
+        return entity instanceof AgeableMob ageable ? ageable.getAge() : null;
+    }
+
+    static ItemStack pickResult(Entity entity) {
+        return entity.getPickResult();
     }
 
     static Component villagerLine(Entity entity) {

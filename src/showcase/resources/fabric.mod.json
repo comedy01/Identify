@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "identify-showcase",
+	"version": "1.0.0",
+	"name": "Identify showcase",
+	"description": "Development-only film director for Identify's gallery video. Not shipped.",
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.identify.showcase.IdentifyShowcaseFabric"
+		]
+	},
+	"depends": {
+		"identify": "*"
+	},
+	"mixins": [
+		"identify_showcase.mixins.json"
+	]
+}

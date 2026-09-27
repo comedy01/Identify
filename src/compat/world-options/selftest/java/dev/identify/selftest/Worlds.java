@@ -1,6 +1,7 @@
 package dev.identify.selftest;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.Difficulty;
@@ -25,5 +26,10 @@ final class Worlds {
 
     static void runCommand(IntegratedServer server, String command) {
         server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), command);
+    }
+
+    static void screenshot(Minecraft mc, String name) {
+        Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), message -> {
+        });
     }
 }
