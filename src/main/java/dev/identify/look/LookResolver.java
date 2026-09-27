@@ -71,7 +71,7 @@ public final class LookResolver {
     }
 
     private static LookTarget describeEntity(Minecraft mc, Entity entity, IdentifyConfig config) {
-        ItemStack pick = entity.getPickResult();
+        ItemStack pick = MobCompat.pickResult(entity);
         ItemStack icon = pick == null ? ItemStack.EMPTY : pick;
         String namespace = GameRegistries.entityNamespace(entity.getType());
         List<Component> details = config.showDetails() ? EntityDetails.of(mc, entity) : List.of();

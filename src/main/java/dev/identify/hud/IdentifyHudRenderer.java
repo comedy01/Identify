@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,7 @@ public final class IdentifyHudRenderer {
         Component mod = null;
         if (config.showModName()) {
             mod = Texts.literal(LookResolver.modLabel(target))
-                    .withStyle(Style.EMPTY.withItalic(true).withColor(MOD_COLOR));
+                    .withStyle(Style.EMPTY.withItalic(true).withColor(TextColor.fromRgb(MOD_COLOR)));
             lines.add(mod);
         }
 

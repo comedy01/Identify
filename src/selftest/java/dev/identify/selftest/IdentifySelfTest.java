@@ -7,7 +7,6 @@ import dev.identify.look.ItemCompare;
 import dev.identify.look.LookResolver;
 import dev.identify.look.LookTarget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -47,6 +46,7 @@ public final class IdentifySelfTest {
     private int delay;
     private int waited;
     private int titleWait;
+    private int floor;
 
     public IdentifySelfTest(Path configDir, Supplier<Screen> settingsScreen) {
         this.configDir = configDir;
@@ -102,53 +102,56 @@ public final class IdentifySelfTest {
 
     private void plan(Minecraft mc) {
         steps.add(new Step(0, () -> mc.level != null && mc.player != null && mc.screen == null
-                && mc.getSingleplayerServer() != null, () -> log("world loaded")));
+                && mc.getSingleplayerServer() != null, () -> {
+            floor = (int) Math.floor(mc.player.getY());
+            log("world loaded, floor " + floor);
+        }));
         then(40, () -> {
             IdentifyClient.config().resetToDefaults();
             check(Files.exists(configDir.resolve(IdentifyConfig.FILE_NAME)), "config file missing");
-            run(mc, "tp @p 0.5 -60 0.5 0 0");
+            run(mc, "tp @p 0.5 " + floor + " 0.5 0 0");
             run(mc, "time set noon");
-            run(mc, "setblock 0 -59 3 beehive[honey_level=3]");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 beehive[honey_level=3]");
         });
         then(20, () -> {
             LookTarget hive = look(mc);
             expect(hive, "Beehive", "Honey: 3/5", "Best tool: Axe");
             screenshot(mc, "identify-beehive");
-            run(mc, "setblock 0 -59 3 air");
-            run(mc, "setblock 0 -60 3 dirt");
-            run(mc, "setblock 0 -59 3 sweet_berry_bush[age=2]");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
+            run(mc, "setblock 0 " + floor + " 3 dirt");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 sweet_berry_bush[age=2]");
         });
         then(20, () -> {
             expect(look(mc), "Sweet Berry Bush", "Growth: 2/3 (67%)");
-            run(mc, "setblock 0 -59 3 air");
-            run(mc, "fill -1 -60 2 1 -60 4 iron_block");
-            run(mc, "setblock 0 -59 3 beacon{Primary:1,Secondary:10}");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
+            run(mc, "fill -1 " + floor + " 2 1 " + floor + " 4 iron_block");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 beacon{Primary:1,Secondary:10}");
         });
         then(200, () -> {
             expect(look(mc), "Beacon", "Tier 1", "Range: 20 blocks", "Effects: Speed, Regeneration");
             screenshot(mc, "identify-beacon");
-            run(mc, "setblock 0 -59 3 air");
-            run(mc, "fill -1 -60 2 1 -60 4 air");
-            run(mc, "summon villager 0.5 -60 3.5 {NoAI:1b,Rotation:[180f,0f],"
+            run(mc, "setblock 0 " + (floor + 1) + " 3 air");
+            run(mc, "fill -1 " + floor + " 2 1 " + floor + " 4 air");
+            run(mc, "summon villager 0.5 " + floor + " 3.5 {NoAI:1b,Rotation:[180f,0f],"
                     + "VillagerData:{profession:\"minecraft:farmer\",level:2,type:\"minecraft:plains\"}}");
         });
         then(20, () -> {
             expect(look(mc), "Farmer", "Health: 20 / 20", "Farmer · Apprentice");
             screenshot(mc, "identify-villager");
             run(mc, "kill @e[type=villager]");
-            run(mc, "tp @p 0.5 -60 0.5 0 20");
-            run(mc, "summon horse 0.5 -60 3.5 {NoAI:1b}");
+            run(mc, "tp @p 0.5 " + floor + " 0.5 0 20");
+            run(mc, "summon horse 0.5 " + floor + " 3.5 {NoAI:1b}");
         });
         then(20, () -> {
             expect(look(mc), "Horse", "Speed: ", "Jump: ");
             run(mc, "kill @e[type=horse]");
-            run(mc, "tp @p 0.5 -60 0.5 0 0");
+            run(mc, "tp @p 0.5 " + floor + " 0.5 0 0");
             run(mc, "item replace entity @p armor.chest with iron_chestplate");
         });
         then(10, () -> {
             checkTooltips(mc);
             ItemStack worn = mc.player.getItemBySlot(EquipmentSlot.CHEST);
-            check(worn.is(Items.IRON_CHESTPLATE), "chestplate not equipped: " + worn);
+            check(worn.getItem() == Items.IRON_CHESTPLATE, "chestplate not equipped: " + worn);
             Component diff = ItemCompare.difference(new ItemStack(Items.DIAMOND_CHESTPLATE), worn, EquipmentSlot.CHEST);
             log("compare diamond vs iron: " + (diff == null ? null : diff.getString()));
             check(diff != null && diff.getString().contains("+2 Armor") && diff.getString().contains("+2 Toughness"),
@@ -167,7 +170,7 @@ public final class IdentifySelfTest {
             button(mc.screen, "Blocks: OFF").onClick(0, 0);
             check(IdentifyClient.config().showBlocks(), "Blocks toggle did not turn back on");
             mc.setScreen(null);
-            run(mc, "setblock 0 -59 3 beehive[honey_level=5]");
+            run(mc, "setblock 0 " + (floor + 1) + " 3 beehive[honey_level=5]");
         });
         then(20, () -> {
             expect(look(mc), "Beehive", "Honey ready to harvest");
@@ -210,12 +213,13 @@ public final class IdentifySelfTest {
 
     private static TooltipFlag normalFlag() {
         try {
-            try {
-                return (TooltipFlag) TooltipFlag.class.getField("NORMAL").get(null);
-            } catch (NoSuchFieldException e) {
-                return (TooltipFlag) Class.forName(TooltipFlag.class.getName() + "$Default").getField("NORMAL").get(null);
-            }
+            return (TooltipFlag) TooltipFlag.class.getField("NORMAL").get(null);
         } catch (ReflectiveOperationException e) {
+            for (Class<?> nested : TooltipFlag.class.getDeclaredClasses()) {
+                if (nested.isEnum() && TooltipFlag.class.isAssignableFrom(nested)) {
+                    return (TooltipFlag) nested.getEnumConstants()[0];
+                }
+            }
             throw new IllegalStateException(e);
         }
     }
@@ -243,8 +247,7 @@ public final class IdentifySelfTest {
     }
 
     private static void screenshot(Minecraft mc, String name) {
-        Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), message -> {
-        });
+        Worlds.screenshot(mc, name);
     }
 
     private static void check(boolean ok, String message) {

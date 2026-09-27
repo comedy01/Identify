@@ -223,3 +223,27 @@ if (gametest) {
 		}
 	}
 }
+
+if (fabric && !remap && project.findProperty("ec.showcase") != null) {
+	sourceSets {
+		showcase
+	}
+	sourceSets.showcase.compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+	sourceSets.showcase.runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+
+	loom {
+		mods {
+			identify_showcase {
+				sourceSet sourceSets.showcase
+			}
+		}
+		runs {
+			showcase {
+				client()
+				source sourceSets.showcase
+				programArgs "--width", "1920", "--height", "1080", "--username", "Identify"
+				vmArgs(["-Xmx2G"] + project.properties.findAll { it.key.startsWith("ec.") }.collect { "-Didentify.${it.key.substring(3)}=${it.value}" })
+			}
+		}
+	}
+}

@@ -13,7 +13,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -38,15 +37,15 @@ public final class EntityDetails {
             lines.add(healthLine(living));
         }
 
-        if (entity instanceof AgeableMob ageable) {
-            Integer exactAge = serverAge(mc, entity);
+        if (MobCompat.isAgeable(entity)) {
+            Integer exactAge = MobCompat.age(serverTwin(mc, entity));
             if (exactAge != null) {
                 if (exactAge < 0) {
                     lines.add(Texts.translatable("identify.entity.baby_grows", TickTime.clock(-exactAge)));
                 } else if (exactAge > 0) {
                     lines.add(Texts.translatable("identify.entity.breed_cooldown", TickTime.clock(exactAge)));
                 }
-            } else if (ageable.isBaby()) {
+            } else if (entity instanceof LivingEntity living && living.isBaby()) {
                 lines.add(Texts.translatable("identify.entity.baby"));
             }
         }
@@ -151,13 +150,6 @@ public final class EntityDetails {
             return null;
         }
         return Texts.translatable("identify.entity.holding", held.getHoverName());
-    }
-
-    private static Integer serverAge(Minecraft mc, Entity entity) {
-        if (serverTwin(mc, entity) instanceof AgeableMob ageable) {
-            return ageable.getAge();
-        }
-        return null;
     }
 
     private static Entity serverTwin(Minecraft mc, Entity entity) {
