@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -66,7 +65,7 @@ public final class LookResolver {
         }
         Item item = state.getBlock().asItem();
         ItemStack icon = item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item);
-        String namespace = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace();
+        String namespace = GameRegistries.blockNamespace(state.getBlock());
         List<Component> details = config.showDetails() ? BlockDetails.of(level, pos, state) : List.of();
         return new LookTarget(state.getBlock().getName(), icon, namespace, details);
     }
@@ -74,7 +73,7 @@ public final class LookResolver {
     private static LookTarget describeEntity(Minecraft mc, Entity entity, IdentifyConfig config) {
         ItemStack pick = entity.getPickResult();
         ItemStack icon = pick == null ? ItemStack.EMPTY : pick;
-        String namespace = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getNamespace();
+        String namespace = GameRegistries.entityNamespace(entity.getType());
         List<Component> details = config.showDetails() ? EntityDetails.of(mc, entity) : List.of();
         return new LookTarget(entity.getDisplayName(), icon, namespace, details);
     }

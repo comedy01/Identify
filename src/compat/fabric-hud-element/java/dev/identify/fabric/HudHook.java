@@ -11,6 +11,6 @@ final class HudHook {
 
     static void register() {
         HudElementRegistry.addLast(Ids.of("look_info"), (graphics, deltaTracker) ->
-                IdentifyHudRenderer.render(new Canvas(graphics), deltaTracker));
+                IdentifyHudRenderer.render(new Canvas(graphics), deltaTracker.getGameTimeDeltaPartialTick(false)));
     }
 }

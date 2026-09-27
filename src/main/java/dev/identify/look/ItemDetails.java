@@ -1,12 +1,11 @@
 package dev.identify.look;
 
+import dev.identify.Texts;
 import dev.identify.client.IdentifyClient;
 import dev.identify.info.TickTime;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -27,13 +26,13 @@ public final class ItemDetails {
             int max = stack.getMaxDamage();
             int left = max - stack.getDamageValue();
             int percent = TickTime.percent(left, max);
-            lines.add(Component.translatable("identify.item.durability", left, max, percent)
+            lines.add(Texts.translatable("identify.item.durability", left, max, percent)
                     .withStyle(durabilityColor(percent)));
         }
 
-        FoodProperties food = stack.get(DataComponents.FOOD);
+        FoodValues food = FoodCompat.of(stack);
         if (food != null) {
-            lines.add(Component.translatable(
+            lines.add(Texts.translatable(
                     "identify.item.food",
                     food.nutrition(),
                     String.format(Locale.ROOT, "%.1f", food.saturation()))
@@ -46,7 +45,7 @@ public final class ItemDetails {
             String shown = Math.abs(smelts - Math.round(smelts)) < 0.005D
                     ? Long.toString(Math.round(smelts))
                     : String.format(Locale.ROOT, "%.1f", smelts);
-            lines.add(Component.translatable("identify.item.fuel", shown).withStyle(ChatFormatting.RED));
+            lines.add(Texts.translatable("identify.item.fuel", shown).withStyle(ChatFormatting.RED));
         }
 
         if (IdentifyClient.config().compareItems()) {

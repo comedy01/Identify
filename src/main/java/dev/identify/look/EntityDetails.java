@@ -1,5 +1,6 @@
 package dev.identify.look;
 
+import dev.identify.Texts;
 import dev.identify.info.HorseStats;
 import dev.identify.info.Numbers;
 import dev.identify.info.TickTime;
@@ -41,12 +42,12 @@ public final class EntityDetails {
             Integer exactAge = serverAge(mc, entity);
             if (exactAge != null) {
                 if (exactAge < 0) {
-                    lines.add(Component.translatable("identify.entity.baby_grows", TickTime.clock(-exactAge)));
+                    lines.add(Texts.translatable("identify.entity.baby_grows", TickTime.clock(-exactAge)));
                 } else if (exactAge > 0) {
-                    lines.add(Component.translatable("identify.entity.breed_cooldown", TickTime.clock(exactAge)));
+                    lines.add(Texts.translatable("identify.entity.breed_cooldown", TickTime.clock(exactAge)));
                 }
             } else if (ageable.isBaby()) {
-                lines.add(Component.translatable("identify.entity.baby"));
+                lines.add(Texts.translatable("identify.entity.baby"));
             }
         }
 
@@ -75,9 +76,9 @@ public final class EntityDetails {
         String max = Numbers.trim(living.getMaxHealth());
         int armor = living.getArmorValue();
         if (armor > 0) {
-            return Component.translatable("identify.entity.health_armor", health, max, armor);
+            return Texts.translatable("identify.entity.health_armor", health, max, armor);
         }
-        return Component.translatable("identify.entity.health", health, max);
+        return Texts.translatable("identify.entity.health", health, max);
     }
 
     private static Component ownerLine(Minecraft mc, Entity entity) {
@@ -87,9 +88,9 @@ public final class EntityDetails {
         UUID owner = MobCompat.owner(entity);
         String name = owner == null ? null : playerName(mc, owner);
         if (name != null) {
-            return Component.translatable("identify.entity.owner", name);
+            return Texts.translatable("identify.entity.owner", name);
         }
-        return Component.translatable("identify.entity.tamed");
+        return Texts.translatable("identify.entity.tamed");
     }
 
     private static String playerName(Minecraft mc, UUID uuid) {
@@ -107,7 +108,7 @@ public final class EntityDetails {
         }
         double speed = HorseStats.blocksPerSecond(horse.getAttributeValue(Attributes.MOVEMENT_SPEED));
         double jump = HorseStats.jumpHeight(horse.getAttributeValue(Attributes.JUMP_STRENGTH));
-        return Component.translatable("identify.entity.horse", Numbers.trim(speed), Numbers.trim(jump));
+        return Texts.translatable("identify.entity.horse", Numbers.trim(speed), Numbers.trim(jump));
     }
 
     private static Component effectsLine(LivingEntity living) {
@@ -121,7 +122,7 @@ public final class EntityDetails {
             return null;
         }
 
-        MutableComponent names = Component.empty();
+        MutableComponent names = Texts.empty();
         int shown = Math.min(effects.size(), MAX_EFFECT_NAMES);
         for (int i = 0; i < shown; i++) {
             if (i > 0) {
@@ -132,14 +133,14 @@ public final class EntityDetails {
         if (effects.size() > shown) {
             names.append(" +" + (effects.size() - shown));
         }
-        return Component.translatable("identify.entity.effects", names);
+        return Texts.translatable("identify.entity.effects", names);
     }
 
     private static Component effectName(MobEffectInstance effect) {
-        Component name = effect.getEffect().value().getDisplayName();
+        Component name = EffectCompat.name(effect);
         int amplifier = effect.getAmplifier();
         if (amplifier >= 1 && amplifier <= MAX_POTENCY_LABEL) {
-            return Component.translatable("potion.withAmplifier", name, Component.translatable("potion.potency." + amplifier));
+            return Texts.translatable("potion.withAmplifier", name, Texts.translatable("potion.potency." + amplifier));
         }
         return name;
     }
@@ -149,7 +150,7 @@ public final class EntityDetails {
         if (held.isEmpty()) {
             return null;
         }
-        return Component.translatable("identify.entity.holding", held.getHoverName());
+        return Texts.translatable("identify.entity.holding", held.getHoverName());
     }
 
     private static Integer serverAge(Minecraft mc, Entity entity) {
