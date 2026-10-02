@@ -1,0 +1,12 @@
+[
+	{
+		"modid": "identify",
+		"name": "Identify",
+		"description": "Shows the name and icon of the block or entity you are looking at, with extras like crop growth, mob intel, and beacon or spawner info, in a compact panel you can place anywhere on screen. Adds durability, food, and fuel info and Shift-to-compare equipment to item tooltips. Client-side only.",
+		"version": "${version}",
+		"mcversion": "${label}",
+		"url": "https://github.com/comedy01/Identify",
+		"authorList": ["comedy01"],
+		"logoFile": "assets/identify/icon.png"
+	}
+]

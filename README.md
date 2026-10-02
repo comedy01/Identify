@@ -4,7 +4,7 @@ Shows what you are looking at. Point at a block or an entity and a panel at the 
 
 Identify is a small client-side mod for Minecraft on Fabric, NeoForge or Forge, compatible with Mod Menu (Fabric) / the built-in config screen (NeoForge and Forge).
 
-Supported versions: 1.18.2, 1.19.2, 1.20.1 and 1.21 to 26.3 on Fabric, 1.21 to 26.3 on NeoForge, and 1.18.2, 1.19.2 and 1.20.1 on Forge.
+Supported versions: 1.18.2, 1.19.2, 1.20.1 and 1.21 to 26.3 on Fabric, 1.21 to 26.3 on NeoForge, and 1.12.2, 1.16.5, 1.18.2, 1.19.2 and 1.20.1 on Forge.
 
 ## Features
 
@@ -22,6 +22,7 @@ Some information depends on where you play:
 - Exact grow-up and breeding timers, and fuel values on 26.3, come from the integrated server, so they are available in singleplayer and on a LAN host. On other servers a baby animal is shown as just "Baby".
 - Servers do not send other mobs' active effects to clients, so the effects line only appears in singleplayer (and for yourself).
 - A pet's owner is looked up in the player list, so the name only shows while the owner is online. Otherwise the panel shows "Tamed".
+- On 1.12.2 a villager's profession is already part of its name, so there is no separate profession line.
 
 ## Install
 
@@ -39,7 +40,7 @@ Optional: add [Mod Menu](https://modrinth.com/mod/modmenu) to get a settings scr
 2. Put the NeoForge Identify jar for your version in your `mods` folder.
 3. Start the game. The settings screen is available from the mod list (*Mods > Identify > Config*).
 
-**Forge (1.18.2, 1.19.2, 1.20.1)**
+**Forge (1.12.2, 1.16.5, 1.18.2, 1.19.2, 1.20.1)**
 
 1. Install [Forge](https://files.minecraftforge.net/) for your version of Minecraft.
 2. Put the Forge Identify jar for your version in your `mods` folder.
@@ -47,4 +48,4 @@ Optional: add [Mod Menu](https://modrinth.com/mod/modmenu) to get a settings scr
 
 ## Building
 
-`./gradlew build -Pminecraft_version=26.3` builds the Fabric jar for one version; add `-Ploader=neoforge` for NeoForge, or use `-Ploader=forge -Pminecraft_version=1.20.1` for Forge. `./gradlew runClientGameTest -Pminecraft_version=26.3` runs the in-game test on Fabric (1.21.4 and newer), and `./gradlew runClient -Ploader=neoforge -Pminecraft_version=1.21.1` starts NeoForge with a load self-test that prints its result and closes the game. On 1.18.2, 1.19.2 and 1.20.1, `./gradlew runSelftest -Pminecraft_version=1.20.1` (add `-Ploader=forge` for Forge) plays through a flat test world and prints `RESULT=PASS` or `RESULT=FAIL`.
+`./gradlew build -Pminecraft_version=26.3` builds the Fabric jar for one version; add `-Ploader=neoforge` for NeoForge, or use `-Ploader=forge -Pminecraft_version=1.20.1` for Forge. `./gradlew runClientGameTest -Pminecraft_version=26.3` runs the in-game test on Fabric (1.21.4 and newer), and `./gradlew runClient -Ploader=neoforge -Pminecraft_version=1.21.1` starts NeoForge with a load self-test that prints its result and closes the game. On 1.18.2, 1.19.2 and 1.20.1, `./gradlew runSelftest -Pminecraft_version=1.20.1` (add `-Ploader=forge` for Forge) plays through a flat test world and prints `RESULT=PASS` or `RESULT=FAIL`. Forge 1.16.5 and 1.12.2 have their own Gradle projects: run `./gradlew build` in `legacy-forge` (1.16.5) or `retro-forge` (1.12.2).
