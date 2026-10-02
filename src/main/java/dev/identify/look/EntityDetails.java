@@ -19,6 +19,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.UUID;
 
@@ -112,10 +113,14 @@ public final class EntityDetails {
 
     private static Component effectsLine(LivingEntity living) {
         List<MobEffectInstance> effects = new ArrayList<>();
-        for (MobEffectInstance effect : living.getActiveEffects()) {
-            if (effect.isVisible()) {
-                effects.add(effect);
+        try {
+            for (MobEffectInstance effect : living.getActiveEffects()) {
+                if (effect.isVisible()) {
+                    effects.add(effect);
+                }
             }
+        } catch (ConcurrentModificationException e) {
+            return null;
         }
         if (effects.isEmpty()) {
             return null;
