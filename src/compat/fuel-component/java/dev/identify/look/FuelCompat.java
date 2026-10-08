@@ -32,8 +32,12 @@ final class FuelCompat {
         if (level == null) {
             return 0;
         }
-        LootParams params = new LootParams.Builder(level).create(LootContextParamSets.EMPTY);
-        LootContext context = new LootContext.Builder(params).create(Optional.empty());
-        return ResolvableInt.getFromItem(stack, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0);
+        try {
+            LootParams params = new LootParams.Builder(level).create(LootContextParamSets.EMPTY);
+            LootContext context = new LootContext.Builder(params).withOptionalRandomSeed(0L).create(Optional.empty());
+            return ResolvableInt.getFromItem(stack, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0);
+        } catch (RuntimeException e) {
+            return 0;
+        }
     }
 }

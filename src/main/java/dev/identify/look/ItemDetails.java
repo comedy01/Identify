@@ -17,12 +17,12 @@ public final class ItemDetails {
     private ItemDetails() {
     }
 
-    public static void append(ItemStack stack, List<Component> lines) {
+    public static void append(ItemStack stack, List<Component> lines, boolean advanced) {
         if (stack.isEmpty()) {
             return;
         }
 
-        if (stack.isDamageableItem()) {
+        if (stack.isDamageableItem() && !(advanced && stack.isDamaged())) {
             int max = stack.getMaxDamage();
             int left = max - stack.getDamageValue();
             int percent = TickTime.percent(left, max);

@@ -36,9 +36,9 @@ public final class IdentifySettingsScreen extends OptionsPage {
                         config::itemTooltips, config::setItemTooltips));
 
         addRow(
-                toggleButton("identify.options.blocks", null,
+                toggleButton("identify.options.blocks", "identify.options.blocks.tooltip",
                         config::showBlocks, config::setShowBlocks),
-                toggleButton("identify.options.entities", null,
+                toggleButton("identify.options.entities", "identify.options.entities.tooltip",
                         config::showEntities, config::setShowEntities));
 
         addRow(

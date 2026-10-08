@@ -213,6 +213,32 @@ jar {
 	}
 }
 
+if (selfTest && remap) {
+	def selftestJar = tasks.register("selftestJar", Jar) {
+		from sourceSets.selftest.output
+		archiveClassifier = "selftest-dev"
+	}
+	tasks.register("remapSelftestJar", net.fabricmc.loom.task.RemapJarTask) {
+		inputFile = selftestJar.flatMap { it.archiveFile }
+		archiveClassifier = "selftest"
+		addNestedDependencies = false
+	}
+}
+
+if (forge && project.hasProperty("prodselftest")) {
+	def selftestJar = tasks.register("selftestJar", Jar) {
+		from sourceSets.selftest.output
+		archiveClassifier = "selftest-dev"
+	}
+	["selftestRuntimeElements", "selftestApiElements"].each { name ->
+		configurations.create(name) {
+			canBeConsumed = true
+			canBeResolved = false
+		}
+	}
+	obfuscation.reobfuscate(selftestJar, sourceSets.selftest)
+}
+
 if (gametest) {
 	fabricApi {
 		configureTests {

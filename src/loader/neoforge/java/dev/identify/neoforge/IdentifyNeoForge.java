@@ -5,14 +5,19 @@ import dev.identify.client.Ids;
 import dev.identify.client.gui.IdentifySettingsScreen;
 import dev.identify.hud.Canvas;
 import dev.identify.hud.IdentifyHudRenderer;
+import dev.identify.hud.IdentifyKeys;
+import net.minecraft.client.KeyMapping;
 import dev.identify.look.ItemDetails;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -23,8 +28,17 @@ public final class IdentifyNeoForge {
 
     public IdentifyNeoForge(IEventBus modBus, ModContainer container) {
         IdentifyClient.init(FMLPaths.CONFIGDIR.get());
+        IdentifyClient.setModNames(namespace -> ModList.get().getModContainerById(namespace)
+                .map(modContainer -> modContainer.getModInfo().getDisplayName())
+                .orElse(null));
         modBus.addListener(IdentifyNeoForge::registerGuiLayers);
+        modBus.addListener(RegisterKeyMappingsEvent.class, event -> {
+            for (KeyMapping key : IdentifyKeys.create()) {
+                event.register(key);
+            }
+        });
         NeoForge.EVENT_BUS.addListener(IdentifyNeoForge::onTooltip);
+        NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> IdentifyKeys.tick(Minecraft.getInstance()));
         container.registerExtensionPoint(IConfigScreenFactory.class,
                 (modContainer, parent) -> new IdentifySettingsScreen(parent, Minecraft.getInstance().options));
     }
@@ -36,7 +50,7 @@ public final class IdentifyNeoForge {
 
     private static void onTooltip(ItemTooltipEvent event) {
         if (IdentifyClient.config().enabled() && IdentifyClient.config().itemTooltips()) {
-            ItemDetails.append(event.getItemStack(), event.getToolTip());
+            ItemDetails.append(event.getItemStack(), event.getToolTip(), event.getFlags().isAdvanced());
         }
     }
 }

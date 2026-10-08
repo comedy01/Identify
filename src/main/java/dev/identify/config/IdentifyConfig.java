@@ -78,6 +78,26 @@ public final class IdentifyConfig {
         showEntities = value;
     }
 
+    public boolean toggleBlocks() {
+        showBlocks = !showBlocks;
+        return showBlocks;
+    }
+
+    public boolean toggleEntities() {
+        showEntities = !showEntities;
+        return showEntities;
+    }
+
+    public boolean togglePanel() {
+        boolean next = !(enabled && (showBlocks || showEntities));
+        if (next) {
+            enabled = true;
+        }
+        showBlocks = next;
+        showEntities = next;
+        return next;
+    }
+
     public boolean showIcon() {
         return showIcon;
     }

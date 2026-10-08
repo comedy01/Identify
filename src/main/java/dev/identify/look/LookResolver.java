@@ -1,7 +1,7 @@
 package dev.identify.look;
 
+import dev.identify.client.IdentifyClient;
 import dev.identify.config.IdentifyConfig;
-import dev.identify.info.ModNames;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -46,7 +46,9 @@ public final class LookResolver {
         if (config.showEntities()) {
             AABB box = player.getBoundingBox().expandTowards(look.scale(range)).inflate(1.0D);
             EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
-                    player, eye, end, box, entity -> !entity.isSpectator() && entity.isPickable(), blockDistanceSq);
+                    player, eye, end, box,
+                    entity -> !entity.isSpectator() && entity.isPickable() && !entity.isInvisibleTo(player),
+                    blockDistanceSq);
             if (entityHit != null) {
                 return describeEntity(mc, entityHit.getEntity(), config);
             }
@@ -79,6 +81,6 @@ public final class LookResolver {
     }
 
     public static String modLabel(LookTarget target) {
-        return ModNames.pretty(target.namespace());
+        return IdentifyClient.modLabel(target.namespace());
     }
 }

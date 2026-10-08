@@ -19,7 +19,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,8 +37,10 @@ public final class EntityDetails {
             lines.add(healthLine(living));
         }
 
+        Entity twin = serverTwin(mc, entity);
+
         if (MobCompat.isAgeable(entity)) {
-            Integer exactAge = MobCompat.age(serverTwin(mc, entity));
+            Integer exactAge = serverAge(twin);
             if (exactAge != null) {
                 if (exactAge < 0) {
                     lines.add(Texts.translatable("identify.entity.baby_grows", TickTime.clock(-exactAge)));
@@ -56,8 +57,8 @@ public final class EntityDetails {
         addIfPresent(lines, horseLine(entity));
 
         if (entity instanceof LivingEntity living) {
-            if (serverTwin(mc, entity) instanceof LivingEntity twin) {
-                addIfPresent(lines, effectsLine(twin));
+            if (twin instanceof LivingEntity livingTwin) {
+                addIfPresent(lines, effectsLine(livingTwin));
             }
             addIfPresent(lines, heldLine(living));
         }
@@ -119,7 +120,7 @@ public final class EntityDetails {
                     effects.add(effect);
                 }
             }
-        } catch (ConcurrentModificationException e) {
+        } catch (RuntimeException e) {
             return null;
         }
         if (effects.isEmpty()) {
@@ -157,16 +158,29 @@ public final class EntityDetails {
         return Texts.translatable("identify.entity.holding", held.getHoverName());
     }
 
+    private static Integer serverAge(Entity twin) {
+        try {
+            return MobCompat.age(twin);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
     private static Entity serverTwin(Minecraft mc, Entity entity) {
         MinecraftServer server = mc.getSingleplayerServer();
         ClientLevel clientLevel = mc.level;
         if (server == null || clientLevel == null) {
             return null;
         }
-        ServerLevel serverLevel = server.getLevel(clientLevel.dimension());
-        if (serverLevel == null) {
+        try {
+            ServerLevel serverLevel = server.getLevel(clientLevel.dimension());
+            if (serverLevel == null) {
+                return null;
+            }
+            Entity twin = serverLevel.getEntity(entity.getId());
+            return twin != null && twin.getType() == entity.getType() ? twin : null;
+        } catch (RuntimeException e) {
             return null;
         }
-        return serverLevel.getEntity(entity.getId());
     }
 }

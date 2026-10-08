@@ -42,12 +42,22 @@ public final class ItemCompare {
             return null;
         }
 
+        double[] now = new double[STATS.size()];
+        boolean hasStats = false;
+        for (int i = 0; i < STATS.size(); i++) {
+            now[i] = ModifierCompat.total(stack, slot, STATS.get(i));
+            hasStats |= now[i] != 0.0D;
+        }
+        if (!hasStats) {
+            return null;
+        }
+
         MutableComponent parts = Texts.empty();
         boolean any = false;
-        for (String stat : STATS) {
-            double now = ModifierCompat.total(stack, slot, stat);
-            double delta = now - ModifierCompat.total(equipped, slot, stat);
-            if (now == 0.0D || !Numbers.significant(delta)) {
+        for (int i = 0; i < STATS.size(); i++) {
+            String stat = STATS.get(i);
+            double delta = now[i] - ModifierCompat.total(equipped, slot, stat);
+            if (!Numbers.significant(delta)) {
                 continue;
             }
             if (any) {

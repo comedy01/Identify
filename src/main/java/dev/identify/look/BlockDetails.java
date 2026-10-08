@@ -45,7 +45,7 @@ public final class BlockDetails {
         if (entity instanceof SpawnerBlockEntity spawner) {
             addIfPresent(lines, spawnerLine(level, pos, spawner));
         } else if (entity instanceof BeaconBlockEntity beacon) {
-            beaconLines(level, beacon, lines);
+            beaconLines(level, pos, beacon, lines);
         }
         addIfPresent(lines, toolLine(state));
         return lines;
@@ -57,7 +57,7 @@ public final class BlockDetails {
         IntegerProperty age = ageProperty(state);
         if (age != null) {
             int value = state.getValue(age);
-            int max = Collections.max(age.getPossibleValues());
+            int max = maxAge(state, age);
             if (value >= max) {
                 lines.add(Texts.translatable("identify.crop.mature"));
             } else {
@@ -89,8 +89,8 @@ public final class BlockDetails {
         return Texts.translatable("identify.spawner.mob", display.getType().getDescription());
     }
 
-    private static void beaconLines(Level level, BeaconBlockEntity beacon, List<Component> lines) {
-        CompoundTag tag = BlockEntityCompat.beaconTag(level, beacon);
+    private static void beaconLines(Level level, BlockPos pos, BeaconBlockEntity beacon, List<Component> lines) {
+        CompoundTag tag = ServerBeacon.tag(level, pos, beacon);
         int tier = NbtCompat.intOr(tag, "Levels", 0);
         if (tier <= 0) {
             return;
@@ -146,6 +146,14 @@ public final class BlockDetails {
             }
         }
         return null;
+    }
+
+    private static int maxAge(BlockState state, IntegerProperty age) {
+        int max = Collections.max(age.getPossibleValues());
+        if (state.getBlock() instanceof CropBlock crop) {
+            return Math.max(max, crop.getMaxAge());
+        }
+        return max;
     }
 
     private static Component toolLine(BlockState state) {

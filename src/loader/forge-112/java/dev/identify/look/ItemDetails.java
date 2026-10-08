@@ -18,12 +18,12 @@ public final class ItemDetails {
     private ItemDetails() {
     }
 
-    public static void append(ItemStack stack, List<String> lines) {
+    public static void append(ItemStack stack, List<String> lines, boolean advanced) {
         if (stack.isEmpty()) {
             return;
         }
 
-        if (stack.isItemStackDamageable()) {
+        if (stack.isItemStackDamageable() && !(advanced && stack.isItemDamaged())) {
             int max = stack.getMaxDamage();
             int left = max - stack.getItemDamage();
             int percent = TickTime.percent(left, max);

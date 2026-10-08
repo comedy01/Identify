@@ -17,4 +17,18 @@ class ModNamesTest {
         assertEquals("", ModNames.pretty(""));
         assertEquals("", ModNames.pretty(null));
     }
+
+    @Test
+    void prefersLoaderName() {
+        assertEquals("Twilight Forest", ModNames.label("twilightforest", namespace -> "Twilight Forest"));
+    }
+
+    @Test
+    void fallsBackWhenLoaderHasNoName() {
+        assertEquals("Ae2", ModNames.label("ae2", namespace -> null));
+        assertEquals("Ae2", ModNames.label("ae2", namespace -> " "));
+        assertEquals("Ae2", ModNames.label("ae2", namespace -> {
+            throw new IllegalStateException();
+        }));
+    }
 }

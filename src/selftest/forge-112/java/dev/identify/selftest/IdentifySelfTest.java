@@ -10,12 +10,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.init.Items;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ScreenShotHelper;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
@@ -30,7 +35,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -157,12 +164,16 @@ public final class IdentifySelfTest {
         then(200, () -> {
             expect(look(mc), "Beacon", "Tier 1", "Range: 20 blocks", "Effects: Speed, Regeneration");
             screenshot(mc, "identify-beacon");
+            changeBeaconSilently(mc, new BlockPos(0, floor + 1, 3));
+        });
+        then(40, () -> {
+            expect(look(mc), "Beacon", "Effects: Haste, Regeneration");
             run(mc, "setblock 0 " + (floor + 1) + " 3 air");
             run(mc, "fill -1 " + floor + " 2 1 " + floor + " 4 air");
             run(mc, "tp @p 0.5 " + floor + " 0.5 0 20");
             run(mc, "summon cow 0.5 " + floor + " 3.5 {NoAI:1b,Age:-6000}");
         });
-        then(20, () -> {
+        then(40, () -> {
             expect(look(mc), "Cow", "Health: 10 / 10", "Baby, grows up in ");
             run(mc, "kill @e[type=cow]");
             run(mc, "summon horse 0.5 " + floor + " 3.5 {NoAI:1b,Tame:1b}");
@@ -171,6 +182,12 @@ public final class IdentifySelfTest {
         then(20, () -> {
             expect(look(mc), "Horse", "Tamed", "Speed: ", "Jump: ", "Effects: Speed II");
             screenshot(mc, "identify-horse");
+            check(LookResolver.modLabel(look(mc)).equals("Minecraft"), "wrong mod label: " + LookResolver.modLabel(look(mc)));
+            run(mc, "effect @e[type=horse] invisibility 100 0 true");
+        });
+        then(20, () -> {
+            LookTarget hidden = look(mc);
+            check(hidden == null || !plain(hidden.name()).equals("Horse"), "invisible horse was identified");
             run(mc, "kill @e[type=horse]");
             run(mc, "tp @p 0.5 " + floor + " 0.5 0 0");
             run(mc, "replaceitem entity @p slot.armor.chest iron_chestplate");
@@ -184,6 +201,11 @@ public final class IdentifySelfTest {
             log("compare diamond vs iron: " + diff);
             check(diff != null && diff.contains("+2 Armor") && diff.contains("+2 Toughness"),
                     "wrong comparison: " + diff);
+            String downgrade = plain(ItemCompare.difference(
+                    new ItemStack(Items.IRON_CHESTPLATE), new ItemStack(Items.DIAMOND_CHESTPLATE),
+                    EntityEquipmentSlot.CHEST));
+            log("compare iron vs diamond: " + downgrade);
+            check(downgrade != null && downgrade.contains("-2 Toughness"), "toughness loss hidden: " + downgrade);
             mc.displayGuiScreen(FMLClientHandler.instance()
                     .getGuiFactoryFor(Loader.instance().getIndexedModList().get(IdentifyClient.MOD_ID))
                     .createConfigGui(null));
@@ -210,6 +232,64 @@ public final class IdentifySelfTest {
         then(20, () -> {
             expect(look(mc), "Redstone Dust", "Power: 15");
             screenshot(mc, "identify-redstone");
+            pressKey(mc, "key.identify.blocks", 36);
+        });
+        then(5, () -> {
+            check(!IdentifyClient.config().showBlocks(), "block key did not hide block info");
+            check(look(mc) == null, "redstone still identified with block info hidden");
+            check(IdentifyClient.config().showEntities(), "block key changed entity info");
+            pressKey(mc, "key.identify.blocks", 36);
+        });
+        then(5, () -> {
+            check(IdentifyClient.config().showBlocks(), "block key did not show block info again");
+            expect(look(mc), "Redstone Dust");
+            pressKey(mc, "key.identify.entities", 37);
+        });
+        then(5, () -> {
+            check(!IdentifyClient.config().showEntities(), "entity key did not hide entity info");
+            check(IdentifyClient.config().showBlocks(), "entity key changed block info");
+            pressKey(mc, "key.identify.toggle", 100);
+        });
+        then(5, () -> {
+            check(!IdentifyClient.config().showBlocks() && !IdentifyClient.config().showEntities(),
+                    "panel key did not hide the panel");
+            pressKey(mc, "key.identify.toggle", 100);
+        });
+        then(5, () -> {
+            check(IdentifyClient.config().showBlocks() && IdentifyClient.config().showEntities(),
+                    "panel key did not show the panel again");
+            expect(look(mc), "Redstone Dust");
+        });
+    }
+
+    private static void pressKey(Minecraft mc, String name, int code) {
+        for (KeyBinding key : mc.gameSettings.keyBindings) {
+            if (key.getKeyDescription().equals(name)) {
+                key.setKeyCode(code);
+                KeyBinding.resetKeyBindingArrayAndHash();
+                KeyBinding.onTick(code);
+                log("pressed " + name);
+                return;
+            }
+        }
+        throw new AssertionError("key not registered: " + name);
+    }
+
+    private static void changeBeaconSilently(Minecraft mc, BlockPos pos) {
+        IntegratedServer server = mc.getIntegratedServer();
+        server.addScheduledTask(() -> {
+            TileEntity beacon = server.getWorld(0).getTileEntity(pos);
+            for (Field field : beacon.getClass().getDeclaredFields()) {
+                if (field.getType() == Potion.class && !Modifier.isStatic(field.getModifiers())) {
+                    try {
+                        field.setAccessible(true);
+                        field.set(beacon, MobEffects.HASTE);
+                    } catch (IllegalAccessException e) {
+                        throw new IllegalStateException(e);
+                    }
+                    return;
+                }
+            }
         });
     }
 

@@ -69,6 +69,22 @@ class IdentifyConfigTest {
     }
 
     @Test
+    void bossBarsEndBelowEachBar() {
+        assertEquals(0, IdentifyPolicy.bossBarsBottom(0, 240));
+        assertEquals(17, IdentifyPolicy.bossBarsBottom(1, 240));
+        assertEquals(36, IdentifyPolicy.bossBarsBottom(2, 240));
+        assertEquals(IdentifyPolicy.bossBarsBottom(4, 240), IdentifyPolicy.bossBarsBottom(20, 240));
+    }
+
+    @Test
+    void panelMovesBelowBossBarsOnlyWhenOverlapping() {
+        assertEquals(19, IdentifyPolicy.clearOfBossBars(4, 150, 100, 400, 240, 1));
+        assertEquals(4, IdentifyPolicy.clearOfBossBars(4, 150, 100, 400, 240, 0));
+        assertEquals(4, IdentifyPolicy.clearOfBossBars(4, 4, 100, 400, 240, 1));
+        assertEquals(200, IdentifyPolicy.clearOfBossBars(200, 150, 100, 400, 240, 1));
+    }
+
+    @Test
     void brokenFileFallsBackToDefaultsAndKeepsBackup() throws IOException {
         Path file = dir.resolve(IdentifyConfig.FILE_NAME);
         Files.writeString(file, "{not json", StandardCharsets.UTF_8);

@@ -39,7 +39,7 @@ public final class BlockDetails {
         if (tile instanceof TileEntityMobSpawner) {
             addIfPresent(lines, spawnerLine((TileEntityMobSpawner) tile));
         } else if (tile instanceof TileEntityBeacon) {
-            beaconLines((TileEntityBeacon) tile, lines);
+            beaconLines(world, pos, (TileEntityBeacon) tile, lines);
         }
         addIfPresent(lines, toolLine(state));
         return lines;
@@ -73,16 +73,17 @@ public final class BlockDetails {
         return I18n.format("identify.spawner.mob", display.getName());
     }
 
-    private static void beaconLines(TileEntityBeacon beacon, List<String> lines) {
-        int tier = beacon.getField(BEACON_LEVELS);
+    private static void beaconLines(World world, BlockPos pos, TileEntityBeacon beacon, List<String> lines) {
+        int[] fields = ServerBeacon.fields(world, pos, beacon);
+        int tier = fields[BEACON_LEVELS];
         if (tier <= 0) {
             return;
         }
         int range = BEACON_RANGE_BASE + tier * BEACON_RANGE_PER_TIER;
         lines.add(I18n.format("identify.beacon.tier", tier, range));
 
-        int primaryId = beacon.getField(BEACON_PRIMARY);
-        int secondaryId = beacon.getField(BEACON_SECONDARY);
+        int primaryId = fields[BEACON_PRIMARY];
+        int secondaryId = fields[BEACON_SECONDARY];
         String primary = effectName(primaryId);
         String secondary = effectName(secondaryId);
         if (primary == null) {

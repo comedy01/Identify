@@ -47,11 +47,21 @@ public final class ItemCompare {
             return null;
         }
 
+        double[] now = new double[STATS.size()];
+        boolean hasStats = false;
+        for (int i = 0; i < STATS.size(); i++) {
+            now[i] = total(stack, slot, STATS.get(i));
+            hasStats |= now[i] != 0.0D;
+        }
+        if (!hasStats) {
+            return null;
+        }
+
         StringBuilder parts = new StringBuilder();
-        for (String stat : STATS) {
-            double now = total(stack, slot, stat);
-            double delta = now - total(equipped, slot, stat);
-            if (now == 0.0D || !Numbers.significant(delta)) {
+        for (int i = 0; i < STATS.size(); i++) {
+            String stat = STATS.get(i);
+            double delta = now[i] - total(equipped, slot, stat);
+            if (!Numbers.significant(delta)) {
                 continue;
             }
             if (parts.length() > 0) {

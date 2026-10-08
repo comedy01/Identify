@@ -5,7 +5,9 @@
   "identify.options.item_tooltips": "Item Tooltips",
   "identify.options.item_tooltips.tooltip": "Add durability, food, and fuel info to item tooltips.",
   "identify.options.blocks": "Blocks",
+  "identify.options.blocks.tooltip": "Show the panel for blocks. The Show/Hide Block Info key flips this in game.",
   "identify.options.entities": "Entities",
+  "identify.options.entities.tooltip": "Show the panel for mobs and other entities. The Show/Hide Entity Info key flips this in game.",
   "identify.options.icon": "Icon",
   "identify.options.details": "Details",
   "identify.options.details.tooltip": "Show extra lines such as health, baby grow-up time, and crop growth.",
@@ -57,5 +59,16 @@
   "identify.entity.breed_cooldown": "Can breed again in %s",
   "identify.item.durability": "Durability: %s/%s (%s%%)",
   "identify.item.food": "Food: %s hunger, %s saturation",
-  "identify.item.fuel": "Fuel: smelts %s items"
+  "identify.item.fuel": "Fuel: smelts %s items",
+  "key.categories.identify.main": "Identify",
+  "key.category.identify.main": "Identify",
+  "key.identify.toggle": "Show/Hide Panel",
+  "key.identify.blocks": "Show/Hide Block Info",
+  "key.identify.entities": "Show/Hide Entity Info",
+  "identify.notice.panel.on": "Identify: panel shown",
+  "identify.notice.panel.off": "Identify: panel hidden",
+  "identify.notice.blocks.on": "Identify: block info shown",
+  "identify.notice.blocks.off": "Identify: block info hidden",
+  "identify.notice.entities.on": "Identify: entity info shown",
+  "identify.notice.entities.off": "Identify: entity info hidden"
 }

@@ -72,7 +72,9 @@ public final class IdentifyHudRenderer {
         int boxHeight = contentHeight + PADDING * 2;
 
         int left = IdentifyPolicy.place(config.xPosition(), canvas.width(), boxWidth);
-        int top = IdentifyPolicy.place(config.yPosition(), canvas.height(), boxHeight);
+        int top = IdentifyPolicy.clearOfBossBars(
+                IdentifyPolicy.place(config.yPosition(), canvas.height(), boxHeight),
+                left, boxWidth, canvas.width(), canvas.height(), HudCompat.bossBarCount(mc));
 
         canvas.fill(left, top, left + boxWidth, top + boxHeight, BORDER);
         canvas.fill(left + 1, top + 1, left + boxWidth - 1, top + boxHeight - 1, BACKGROUND);

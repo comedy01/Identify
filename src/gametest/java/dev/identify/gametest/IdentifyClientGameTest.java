@@ -13,21 +13,29 @@ import dev.identify.look.LookTarget;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.TorchflowerCropBlock;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,6 +60,12 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
             check(!block.icon().isEmpty(), "block icon is empty");
             log("screenshot: " + context.takeScreenshot("identify-block"));
 
+            world.getServer().runCommand("bossbar add identify:test \"Identify Test\"");
+            world.getServer().runCommand("bossbar set identify:test players @a");
+            context.waitTicks(10);
+            log("screenshot: " + context.takeScreenshot("identify-bossbar"));
+            world.getServer().runCommand("bossbar remove identify:test");
+
             world.getServer().runCommand("setblock 0 -59 3 air");
             world.getServer().runCommand("tp @p 0 -60 0 0 18");
             world.getServer().runCommand("summon cow 0 -60 4 {Age:-24000,NoAI:1b}");
@@ -65,6 +79,14 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
             check(cowText.contains("Health: 10 / 10"), "missing health line: " + cowText);
             check(cowText.contains("grows up in 19:"), "missing baby grow-up timer: " + cowText);
             log("screenshot: " + context.takeScreenshot("identify-baby-cow"));
+
+            world.getServer().runCommand("effect give @e[type=cow] minecraft:invisibility 100 0 true");
+            context.waitTicks(10);
+            LookTarget hidden = look(context);
+            check(hidden != null && hidden.name().getString().equals("Grass Block"),
+                    "invisible cow was identified: " + (hidden == null ? "nothing" : hidden.name().getString()));
+            world.getServer().runCommand("effect clear @e[type=cow]");
+            context.waitTicks(10);
 
             config.setShowEntities(false);
             LookTarget ground = look(context);
@@ -88,8 +110,54 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
             checkBlockEntities(context, world);
             checkCompare(context);
             checkSettingsReset(context);
+            checkKeys(context, world);
         }
         log("ALL CHECKS PASSED");
+    }
+
+    private static void checkKeys(ClientGameTestContext context, TestSingleplayerContext world) {
+        IdentifyConfig config = IdentifyClient.config();
+        world.getServer().runCommand("tp @p 0 -60 0 0 0");
+        world.getServer().runCommand("setblock 0 -59 3 diamond_block");
+        context.waitTicks(10);
+        check(look(context) != null, "diamond block not identified before key test");
+
+        press(context, "key.identify.blocks", 74);
+        check(!config.showBlocks(), "block key did not hide block info");
+        check(config.showEntities(), "block key changed entity info");
+        check(look(context) == null, "block still identified with block info hidden");
+        log("screenshot: " + context.takeScreenshot("identify-blocks-hidden"));
+
+        press(context, "key.identify.blocks", 74);
+        check(config.showBlocks(), "block key did not show block info again");
+        check(look(context) != null, "block not identified after showing block info again");
+
+        press(context, "key.identify.entities", 75);
+        check(!config.showEntities(), "entity key did not hide entity info");
+        check(config.showBlocks(), "entity key changed block info");
+
+        press(context, "key.identify.toggle", 302);
+        check(!config.showBlocks() && !config.showEntities(), "panel key did not hide the panel");
+        press(context, "key.identify.toggle", 302);
+        check(config.showBlocks() && config.showEntities(), "panel key did not show the panel again");
+        world.getServer().runCommand("setblock 0 -59 3 air");
+        log("keys ok");
+    }
+
+    private static void press(ClientGameTestContext context, String name, int code) {
+        KeyMapping key = context.computeOnClient(client -> {
+            for (KeyMapping mapping : client.options.keyMappings) {
+                if (mapping.getName().equals(name)) {
+                    mapping.setKey(InputConstants.Type.values()[0].getOrCreate(code));
+                    KeyMapping.resetMapping();
+                    return mapping;
+                }
+            }
+            return null;
+        });
+        check(key != null, "key not registered: " + name);
+        context.getInput().pressKey(key);
+        context.waitTicks(3);
     }
 
     private static void checkMobIntel(ClientGameTestContext context, TestSingleplayerContext world) {
@@ -154,6 +222,25 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
         check(beacon.contains("Effect: Speed"), "wrong beacon effect line: " + beacon);
         log("screenshot: " + context.takeScreenshot("identify-beacon"));
 
+        world.getServer().runOnServer(server -> {
+            BlockEntity entity = server.overworld().getBlockEntity(new BlockPos(0, -59, 3));
+            for (Field field : BeaconBlockEntity.class.getDeclaredFields()) {
+                if (field.getType() == Holder.class) {
+                    field.setAccessible(true);
+                    try {
+                        field.set(entity, MobEffects.REGENERATION);
+                    } catch (IllegalAccessException e) {
+                        throw new IllegalStateException(e);
+                    }
+                    break;
+                }
+            }
+        });
+        context.waitTicks(30);
+        String changed = detailsText(context);
+        log("beacon after silent change: " + changed);
+        check(changed.contains("Effect: Regeneration"), "stale beacon effect: " + changed);
+
         world.getServer().runCommand("setblock 0 -59 3 air");
         world.getServer().runCommand("fill -1 -60 2 1 -60 4 grass_block");
     }
@@ -163,6 +250,7 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
         AtomicReference<String> sword = new AtomicReference<>();
         AtomicReference<Boolean> blockIgnored = new AtomicReference<>();
         AtomicReference<Boolean> sameIgnored = new AtomicReference<>();
+        AtomicReference<String> downgrade = new AtomicReference<>();
         context.runOnClient(client -> {
             ItemStack diamond = new ItemStack(Items.DIAMOND_CHESTPLATE);
             ItemStack iron = new ItemStack(Items.IRON_CHESTPLATE);
@@ -175,12 +263,15 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
             blockIgnored.set(ItemCompare.difference(
                     new ItemStack(Items.STONE), ironSword, EquipmentSlot.MAINHAND) == null);
             sameIgnored.set(ItemCompare.difference(iron, new ItemStack(Items.IRON_CHESTPLATE), EquipmentSlot.CHEST) == null);
+            downgrade.set(ItemCompare.difference(
+                    iron, new ItemStack(Items.NETHERITE_CHESTPLATE), EquipmentSlot.CHEST).getString());
         });
         log("compare: " + armor.get() + " | " + sword.get());
         check(armor.get().equals("+2 Armor, +2 Toughness"), "wrong armor comparison: " + armor.get());
         check(sword.get().equals("+1 Damage"), "wrong sword comparison: " + sword.get());
         check(blockIgnored.get(), "a block was compared against a sword");
         check(sameIgnored.get(), "identical items were compared");
+        check(downgrade.get().contains("-3 Toughness"), "toughness loss hidden: " + downgrade.get());
     }
 
     private static void checkSettingsReset(ClientGameTestContext context) {
@@ -314,7 +405,10 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
     private static void checkCrops(ClientGameTestContext context) {
         AtomicReference<String> growing = new AtomicReference<>();
         AtomicReference<String> mature = new AtomicReference<>();
+        AtomicReference<String> torchflower = new AtomicReference<>();
         context.runOnClient(client -> {
+            torchflower.set(text(BlockDetails.of(
+                    Blocks.TORCHFLOWER_CROP.defaultBlockState().setValue(TorchflowerCropBlock.AGE, 1))));
             BlockState young = Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 3);
             BlockState old = Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 7);
             growing.set(text(BlockDetails.of(young)));
@@ -323,6 +417,7 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
         log("crop details: " + growing.get() + " | " + mature.get());
         check(growing.get().contains("Growth: 3/7 (43%)"), "wrong growth line: " + growing.get());
         check(mature.get().contains("Fully grown"), "wrong mature line: " + mature.get());
+        check(torchflower.get().contains("Growth: 1/2"), "wrong torchflower line: " + torchflower.get());
     }
 
     private static void checkItems(ClientGameTestContext context) {
@@ -344,7 +439,7 @@ public class IdentifyClientGameTest implements FabricClientGameTest {
 
     private static String itemText(ItemStack stack) {
         List<Component> lines = new ArrayList<>();
-        ItemDetails.append(stack, lines);
+        ItemDetails.append(stack, lines, false);
         return text(lines);
     }
 

@@ -21,7 +21,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +49,7 @@ public final class EntityDetails {
                 } else if (age > 0) {
                     lines.add(I18n.format("identify.entity.breed_cooldown", TickTime.clock(age)));
                 }
-            } else if (living.isChild()) {
+            } else if (living != null && living.isChild()) {
                 lines.add(I18n.format("identify.entity.baby"));
             }
         }
@@ -128,7 +127,7 @@ public final class EntityDetails {
                     effects.add(effect);
                 }
             }
-        } catch (ConcurrentModificationException e) {
+        } catch (RuntimeException e) {
             return null;
         }
         if (effects.isEmpty()) {
@@ -171,10 +170,14 @@ public final class EntityDetails {
         if (mc.getIntegratedServer() == null || clientWorld == null) {
             return null;
         }
-        WorldServer serverWorld = DimensionManager.getWorld(clientWorld.provider.getDimension());
-        if (serverWorld == null) {
+        try {
+            WorldServer serverWorld = DimensionManager.getWorld(clientWorld.provider.getDimension());
+            if (serverWorld == null) {
+                return null;
+            }
+            return serverWorld.getEntityByID(entity.getEntityId());
+        } catch (RuntimeException e) {
             return null;
         }
-        return serverWorld.getEntityByID(entity.getEntityId());
     }
 }

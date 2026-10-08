@@ -21,6 +21,12 @@ public final class IdentifyPolicy {
 
     public static final int EDGE_MARGIN = 4;
 
+    public static final int BOSS_BAR_HALF_WIDTH = 91;
+    private static final int BOSS_BAR_TOP = 12;
+    private static final int BOSS_BAR_STEP = 19;
+    private static final int BOSS_BAR_HEIGHT = 5;
+    private static final int BOSS_BAR_GAP = 2;
+
     private IdentifyPolicy() {
     }
 
@@ -41,5 +47,30 @@ public final class IdentifyPolicy {
             return EDGE_MARGIN;
         }
         return EDGE_MARGIN + Math.round(free * clampPosition(percent) / 100.0F);
+    }
+
+    public static int bossBarsBottom(int count, int screenHeight) {
+        int y = BOSS_BAR_TOP;
+        int bottom = 0;
+        for (int i = 0; i < count; i++) {
+            bottom = y + BOSS_BAR_HEIGHT;
+            y += BOSS_BAR_STEP;
+            if (y >= screenHeight / 3) {
+                break;
+            }
+        }
+        return bottom;
+    }
+
+    public static int clearOfBossBars(int top, int left, int width, int screenWidth, int screenHeight, int bossBars) {
+        if (bossBars <= 0) {
+            return top;
+        }
+        int center = screenWidth / 2;
+        if (left + width <= center - BOSS_BAR_HALF_WIDTH || left >= center + BOSS_BAR_HALF_WIDTH) {
+            return top;
+        }
+        int bottom = bossBarsBottom(bossBars, screenHeight) + BOSS_BAR_GAP;
+        return Math.max(top, bottom);
     }
 }

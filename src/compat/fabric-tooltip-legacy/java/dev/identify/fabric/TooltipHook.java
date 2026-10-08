@@ -11,7 +11,7 @@ final class TooltipHook {
     static void register() {
         ItemTooltipCallback.EVENT.register((stack, flag, lines) -> {
             if (IdentifyClient.config().enabled() && IdentifyClient.config().itemTooltips()) {
-                ItemDetails.append(stack, lines);
+                ItemDetails.append(stack, lines, flag.isAdvanced());
             }
         });
     }

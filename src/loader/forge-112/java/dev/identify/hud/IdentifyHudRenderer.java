@@ -71,7 +71,10 @@ public final class IdentifyHudRenderer {
         int boxHeight = contentHeight + PADDING * 2;
 
         int left = IdentifyPolicy.place(config.xPosition(), resolution.getScaledWidth(), boxWidth);
-        int top = IdentifyPolicy.place(config.yPosition(), resolution.getScaledHeight(), boxHeight);
+        int top = IdentifyPolicy.clearOfBossBars(
+                IdentifyPolicy.place(config.yPosition(), resolution.getScaledHeight(), boxHeight),
+                left, boxWidth, resolution.getScaledWidth(), resolution.getScaledHeight(),
+                BossBars.count(mc.ingameGUI.getBossOverlay()));
 
         Gui.drawRect(left, top, left + boxWidth, top + boxHeight, BORDER);
         Gui.drawRect(left + 1, top + 1, left + boxWidth - 1, top + boxHeight - 1, BACKGROUND);

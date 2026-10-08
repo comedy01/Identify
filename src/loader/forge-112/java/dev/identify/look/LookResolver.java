@@ -1,7 +1,7 @@
 package dev.identify.look;
 
+import dev.identify.client.IdentifyClient;
 import dev.identify.config.IdentifyConfig;
-import dev.identify.info.ModNames;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -61,6 +61,7 @@ public final class LookResolver {
         AxisAlignedBB search = player.getEntityBoundingBox().expand(reach.x, reach.y, reach.z).grow(1.0D);
         List<Entity> candidates = world.getEntitiesInAABBexcluding(player, search, entity -> entity != null
                 && entity.canBeCollidedWith()
+                && !entity.isInvisibleToPlayer(player)
                 && !(entity instanceof EntityPlayer && ((EntityPlayer) entity).isSpectator()));
 
         Entity best = null;
@@ -123,6 +124,6 @@ public final class LookResolver {
     }
 
     public static String modLabel(LookTarget target) {
-        return ModNames.pretty(target.namespace());
+        return IdentifyClient.modLabel(target.namespace());
     }
 }

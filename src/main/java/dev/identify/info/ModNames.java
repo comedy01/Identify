@@ -1,9 +1,22 @@
 package dev.identify.info;
 
 import java.util.Locale;
+import java.util.function.Function;
 
 public final class ModNames {
     private ModNames() {
+    }
+
+    public static String label(String namespace, Function<String, String> lookup) {
+        String name = null;
+        if (namespace != null && !namespace.isEmpty()) {
+            try {
+                name = lookup.apply(namespace);
+            } catch (RuntimeException e) {
+                name = null;
+            }
+        }
+        return name == null || name.trim().isEmpty() ? pretty(namespace) : name;
     }
 
     public static String pretty(String namespace) {

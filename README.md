@@ -15,6 +15,7 @@ Supported versions: 1.18.2, 1.19.2, 1.20.1 and 1.21 to 26.3 on Fabric, 1.21 to 2
 - **Equipment comparison** - hold Shift over armor or a weapon to see how it compares with what you have equipped, such as `+2 Armor, +2 Toughness`.
 - **Placement** - two sliders move the panel anywhere on screen, from the top-left corner to the bottom-right corner, at any GUI scale.
 - **Configurable** - toggle blocks, entities, icon, details, mod name, and item comparison, and adjust range and position.
+- **Key binds** - optional keys to show or hide the whole panel, only block info, or only entity info while you play, for example to keep mobs always on and flip blocks with one key. They start unbound; set them under *Options > Controls > Key Binds > Identify*.
 - **Client-side only** - there is nothing to install on a server.
 
 Some information depends on where you play:

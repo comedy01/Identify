@@ -2,6 +2,7 @@ package dev.identify.nftest;
 
 import dev.identify.client.gui.IdentifySettingsScreen;
 import dev.identify.config.IdentifyConfig;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -44,9 +45,15 @@ public final class IdentifySelfTest {
                 .orElse(false);
 
         boolean config = Files.exists(FMLPaths.CONFIGDIR.get().resolve(IdentifyConfig.FILE_NAME));
-        boolean pass = !tooltips.equals("false") && screen && config;
+        int keys = 0;
+        for (KeyMapping key : client.options.keyMappings) {
+            if (key.getName().startsWith("key.identify.")) {
+                keys++;
+            }
+        }
+        boolean pass = !tooltips.equals("false") && screen && config && keys == 3;
         System.out.println("[Identify selftest] tooltips=" + tooltips + " screen=" + screen
-                + " config=" + config + " RESULT=" + (pass ? "PASS" : "FAIL"));
+                + " config=" + config + " keys=" + keys + " RESULT=" + (pass ? "PASS" : "FAIL"));
         client.stop();
     }
 
