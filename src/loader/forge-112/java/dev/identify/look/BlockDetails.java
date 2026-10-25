@@ -33,7 +33,7 @@ public final class BlockDetails {
     private BlockDetails() {
     }
 
-    public static List<String> of(World world, BlockPos pos, IBlockState state) {
+    public static List<String> of(World world, BlockPos pos, IBlockState state, boolean bestTool) {
         List<String> lines = stateLines(state);
         TileEntity tile = world.getTileEntity(pos);
         if (tile instanceof TileEntityMobSpawner) {
@@ -41,7 +41,9 @@ public final class BlockDetails {
         } else if (tile instanceof TileEntityBeacon) {
             beaconLines(world, pos, (TileEntityBeacon) tile, lines);
         }
-        addIfPresent(lines, toolLine(state));
+        if (bestTool) {
+            addIfPresent(lines, toolLine(state));
+        }
         return lines;
     }
 

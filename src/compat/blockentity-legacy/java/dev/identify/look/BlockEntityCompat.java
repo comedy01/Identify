@@ -5,8 +5,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
 final class BlockEntityCompat {
@@ -25,5 +27,9 @@ final class BlockEntityCompat {
         String key = primary ? "Primary" : "Secondary";
         MobEffect effect = tag.contains(key) ? MobEffect.byId(tag.getInt(key)) : null;
         return effect == null ? "" : String.valueOf(BuiltInRegistries.MOB_EFFECT.getKey(effect));
+    }
+
+    static ItemStack disc(JukeboxBlockEntity jukebox) {
+        return jukebox.getFirstItem();
     }
 }

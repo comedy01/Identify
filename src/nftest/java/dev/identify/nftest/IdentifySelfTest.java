@@ -25,13 +25,18 @@ import java.util.List;
 public final class IdentifySelfTest {
     private int ticks;
     private boolean done;
+    private final WorldCheck world = new WorldCheck();
 
     public IdentifySelfTest() {
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, this::onTick);
     }
 
     private void onTick(ClientTickEvent.Post event) {
-        if (done || ++ticks < 120) {
+        if (done) {
+            world.tick(Minecraft.getInstance());
+            return;
+        }
+        if (++ticks < 120) {
             return;
         }
         done = true;
@@ -54,7 +59,9 @@ public final class IdentifySelfTest {
         boolean pass = !tooltips.equals("false") && screen && config && keys == 3;
         System.out.println("[Identify selftest] tooltips=" + tooltips + " screen=" + screen
                 + " config=" + config + " keys=" + keys + " RESULT=" + (pass ? "PASS" : "FAIL"));
-        client.stop();
+        if (!pass) {
+            client.stop();
+        }
     }
 
     private static String tooltipCheck() {

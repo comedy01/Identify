@@ -2,17 +2,17 @@ package dev.identify.look;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
-final class ServerBeacon {
+final class ServerBlockData {
     private static final long REFRESH_TICKS = 10L;
     private static final AtomicBoolean PENDING = new AtomicBoolean();
 
@@ -21,22 +21,25 @@ final class ServerBeacon {
     private static ResourceKey<Level> requestedDimension;
     private static long requestedAt;
 
-    private ServerBeacon() {
+    private ServerBlockData() {
     }
 
-    static CompoundTag tag(Level level, BlockPos pos, BeaconBlockEntity clientBeacon) {
+    @SuppressWarnings("unchecked")
+    static <T> T get(Level level, BlockPos pos, Function<BlockEntity, T> reader) {
         MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
-        if (server != null) {
-            request(server, level, pos);
-            Snapshot snapshot = latest;
-            if (snapshot != null && snapshot.pos().equals(pos) && snapshot.dimension().equals(level.dimension())) {
-                return snapshot.tag();
-            }
+        if (server == null) {
+            return null;
         }
-        return BlockEntityCompat.beaconTag(level, clientBeacon);
+        request(server, level, pos, reader);
+        Snapshot snapshot = latest;
+        if (snapshot != null && snapshot.pos().equals(pos) && snapshot.dimension().equals(level.dimension())
+                && snapshot.block() == level.getBlockState(pos).getBlock()) {
+            return (T) snapshot.value();
+        }
+        return null;
     }
 
-    private static void request(MinecraftServer server, Level level, BlockPos pos) {
+    private static void request(MinecraftServer server, Level level, BlockPos pos, Function<BlockEntity, ?> reader) {
         long now = level.getGameTime();
         ResourceKey<Level> dimension = level.dimension();
         boolean same = pos.equals(requestedPos) && dimension.equals(requestedDimension);
@@ -53,30 +56,32 @@ final class ServerBeacon {
         try {
             server.execute(() -> {
                 try {
-                    latest = read(server, dimension, target);
-                } catch (RuntimeException e) {
+                    latest = read(server, dimension, target, reader);
+                } catch (RuntimeException | LinkageError e) {
                     latest = null;
                 } finally {
                     PENDING.set(false);
                 }
             });
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | LinkageError e) {
             PENDING.set(false);
         }
     }
 
-    private static Snapshot read(MinecraftServer server, ResourceKey<Level> dimension, BlockPos pos) {
+    private static Snapshot read(MinecraftServer server, ResourceKey<Level> dimension, BlockPos pos,
+                                 Function<BlockEntity, ?> reader) {
         ServerLevel level = server.getLevel(dimension);
         if (level == null) {
             return null;
         }
         BlockEntity entity = level.getBlockEntity(pos);
-        if (!(entity instanceof BeaconBlockEntity beacon)) {
+        if (entity == null) {
             return null;
         }
-        return new Snapshot(dimension, pos, BlockEntityCompat.beaconTag(level, beacon));
+        Object value = reader.apply(entity);
+        return value == null ? null : new Snapshot(dimension, pos, level.getBlockState(pos).getBlock(), value);
     }
 
-    private record Snapshot(ResourceKey<Level> dimension, BlockPos pos, CompoundTag tag) {
+    private record Snapshot(ResourceKey<Level> dimension, BlockPos pos, Block block, Object value) {
     }
 }

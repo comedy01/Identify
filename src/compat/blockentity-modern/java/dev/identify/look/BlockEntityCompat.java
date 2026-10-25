@@ -3,8 +3,10 @@ package dev.identify.look;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
 final class BlockEntityCompat {
@@ -21,5 +23,9 @@ final class BlockEntityCompat {
 
     static String effectId(CompoundTag tag, boolean primary) {
         return NbtCompat.stringOr(tag, primary ? "primary_effect" : "secondary_effect", "");
+    }
+
+    static ItemStack disc(JukeboxBlockEntity jukebox) {
+        return jukebox.getTheItem();
     }
 }

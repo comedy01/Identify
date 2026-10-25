@@ -107,7 +107,7 @@ public final class LookResolver {
         ResourceLocation id = block.getRegistryName();
         String namespace = id == null ? "" : id.getNamespace();
         List<String> details = config.showDetails()
-                ? BlockDetails.of(world, pos, state)
+                ? BlockDetails.of(world, pos, state, config.showBestTool())
                 : Collections.<String>emptyList();
         return new LookTarget(name, icon, namespace, details);
     }

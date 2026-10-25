@@ -7,6 +7,7 @@ public final class IdentifyPolicy {
     public static final boolean DEFAULT_SHOW_ICON = true;
     public static final boolean DEFAULT_SHOW_DETAILS = true;
     public static final boolean DEFAULT_SHOW_MOD_NAME = true;
+    public static final boolean DEFAULT_SHOW_BEST_TOOL = true;
     public static final boolean DEFAULT_ITEM_TOOLTIPS = true;
     public static final boolean DEFAULT_COMPARE_ITEMS = true;
 

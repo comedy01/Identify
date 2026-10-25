@@ -10,7 +10,8 @@ Supported versions: 1.18.2, 1.19.2, 1.20.1 and 1.21 to 26.3 on Fabric, 1.21 to 2
 
 - **Block and entity panel** - the icon, name, and owning mod of whatever is under your crosshair, out to a configurable range.
 - **Mob intel** - health with armor, baby grow-up and breeding timers, a pet's owner, a villager's profession and level, a horse's speed and jump height, active effects, and the item a mob is holding. The panel shows at most four detail lines, so it stays compact.
-- **Block details** - crop growth, redstone power, the best tool (and tier) to mine the block, what a spawner spawns, a beacon's tier, range and effects, and a beehive's honey level.
+- **Block details** - crop growth, redstone power, the best tool (and tier) to mine the block, what a spawner spawns, a beacon's tier, range and effects, a beehive's honey level, composter and cauldron fill, repeater delay, comparator mode, note block pitch and instrument, respawn anchor charges, brewing bottles, the disc in a jukebox, and whether a lectern holds a book.
+- **Machine details (singleplayer)** - furnace, smoker and blast furnace progress, fuel and output; brewing progress and blaze fuel; campfire cook time left; the lectern's open page; and stored energy (FE) for blocks from power mods on Forge, NeoForge and Fabric (Team Reborn Energy).
 - **Item tooltips** - remaining durability with a percentage, hunger and saturation for food, and how many items a fuel smelts.
 - **Equipment comparison** - hold Shift over armor or a weapon to see how it compares with what you have equipped, such as `+2 Armor, +2 Toughness`.
 - **Placement** - two sliders move the panel anywhere on screen, from the top-left corner to the bottom-right corner, at any GUI scale.

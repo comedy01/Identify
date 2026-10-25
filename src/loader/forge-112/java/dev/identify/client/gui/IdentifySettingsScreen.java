@@ -58,6 +58,10 @@ public final class IdentifySettingsScreen extends GuiScreen {
         addRow(
                 toggleButton("identify.options.mod_name", null,
                         config::showModName, config::setShowModName),
+                toggleButton("identify.options.best_tool", "identify.options.best_tool.tooltip",
+                        config::showBestTool, config::setShowBestTool));
+
+        addRow(
                 toggleButton("identify.options.compare_items", "identify.options.compare_items.tooltip",
                         config::compareItems, config::setCompareItems));
 

@@ -39,6 +39,9 @@ public final class IdentifyConfig {
     @SerializedName("showModName")
     private boolean showModName = IdentifyPolicy.DEFAULT_SHOW_MOD_NAME;
 
+    @SerializedName("showBestTool")
+    private boolean showBestTool = IdentifyPolicy.DEFAULT_SHOW_BEST_TOOL;
+
     @SerializedName("itemTooltips")
     private boolean itemTooltips = IdentifyPolicy.DEFAULT_ITEM_TOOLTIPS;
 
@@ -122,6 +125,14 @@ public final class IdentifyConfig {
         showModName = value;
     }
 
+    public boolean showBestTool() {
+        return showBestTool;
+    }
+
+    public void setShowBestTool(boolean value) {
+        showBestTool = value;
+    }
+
     public boolean itemTooltips() {
         return itemTooltips;
     }
@@ -169,6 +180,7 @@ public final class IdentifyConfig {
         showIcon = IdentifyPolicy.DEFAULT_SHOW_ICON;
         showDetails = IdentifyPolicy.DEFAULT_SHOW_DETAILS;
         showModName = IdentifyPolicy.DEFAULT_SHOW_MOD_NAME;
+        showBestTool = IdentifyPolicy.DEFAULT_SHOW_BEST_TOOL;
         itemTooltips = IdentifyPolicy.DEFAULT_ITEM_TOOLTIPS;
         compareItems = IdentifyPolicy.DEFAULT_COMPARE_ITEMS;
         range = IdentifyPolicy.DEFAULT_RANGE;
