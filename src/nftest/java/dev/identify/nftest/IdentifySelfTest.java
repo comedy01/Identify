@@ -26,6 +26,10 @@ public final class IdentifySelfTest {
     private int ticks;
     private boolean done;
     private final WorldCheck world = new WorldCheck();
+    private final Showcase showcase = new Showcase();
+    private final boolean showing = System.getenv("IDENTIFY_SHOWCASE") != null;
+    private final Gallery gallery = new Gallery();
+    private final boolean galleryOn = System.getenv("IDENTIFY_GALLERY") != null;
 
     public IdentifySelfTest() {
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, this::onTick);
@@ -33,7 +37,13 @@ public final class IdentifySelfTest {
 
     private void onTick(ClientTickEvent.Post event) {
         if (done) {
-            world.tick(Minecraft.getInstance());
+            if (galleryOn) {
+                gallery.tick(Minecraft.getInstance());
+            } else if (showing) {
+                showcase.tick(Minecraft.getInstance());
+            } else {
+                world.tick(Minecraft.getInstance());
+            }
             return;
         }
         if (++ticks < 120) {
